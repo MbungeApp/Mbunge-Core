@@ -16,6 +16,7 @@ type User struct {
 	ProfilePic   string             `json:"profile_pic" bson:"profile_pic" form:"profile_pic"`
 	Gender       int                `json:"gender" bson:"gender" form:"gender"`
 	Verified     bool               `json:"verified" bson:"verified"`
+	County       string             `json:"county" bson:"county"`
 	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt    time.Time          `json:"updated_at" bson:"updated_at"`
 }

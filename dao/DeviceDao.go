@@ -10,7 +10,7 @@ import (
 )
 
 type DeviceDaoInterface interface {
-	AddDevice(device db.Device) (primitive.ObjectID, error)
+	AddDevice(device db.Device) (db.Device, error)
 	UpdateDevice(id string, key string, value string) (db.Device, error)
 	GetDevice(userId string) (db.Device, error)
 }
@@ -33,15 +33,15 @@ func findDeviceById(id primitive.ObjectID, client *mongo.Client) db.Device {
 	return device
 }
 
-func (d NewDeviceDaoInterface) AddDevice(device db.Device) (primitive.ObjectID, error) {
+func (d NewDeviceDaoInterface) AddDevice(device db.Device) (db.Device, error) {
 	device.ID = primitive.NewObjectID()
 	device.CreatedAt = time.Now()
 	device.UpdatedAt = time.Now()
 	res, err := deviceCollection(d.Client).InsertOne(context.Background(), device)
 	if err != nil {
-		return [12]byte{}, err
+		return db.Device{}, err
 	}
-	return res.InsertedID.(primitive.ObjectID), nil
+	return findDeviceById(res.InsertedID.(primitive.ObjectID), d.Client), nil
 }
 func (d NewDeviceDaoInterface) UpdateDevice(id string, key string, value string) (db.Device, error) {
 	objID, _ := primitive.ObjectIDFromHex(id)

@@ -12,7 +12,7 @@ import (
 type UserDaoInterface interface {
 	AddUser(user db.User) (db.User, error)
 	UpdateUser(id string, key string, value string) (db.User, error)
-	GetUserByEmailAddress(emailAddress string) (db.User, error)
+	GetUserByPhone(phone string) (db.User, error)
 }
 type NewUserDaoInterface struct {
 	Client *mongo.Client
@@ -61,12 +61,12 @@ func (u NewUserDaoInterface) UpdateUser(id string, key string, value string) (db
 
 	return findUserById(objID, u.Client), nil
 }
-func (u NewUserDaoInterface) GetUserByEmailAddress(emailAddress string) (db.User, error) {
+func (u NewUserDaoInterface) GetUserByPhone(phone string) (db.User, error) {
 	var user db.User
 	MbungeDb := *u.Client.Database("mbunge").Collection("user")
 
 	err := MbungeDb.FindOne(context.Background(), bson.M{
-		"email_address": emailAddress,
+		"phone_number": phone,
 	}).Decode(&user)
 
 	if err != nil {
