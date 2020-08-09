@@ -15,7 +15,5 @@
 # vendor/
 
 # idea
-.idea/mbunge-core.iml
-.idea/modules.xml
-.idea/workspace.xml
 *./vscode
+/.idea/
