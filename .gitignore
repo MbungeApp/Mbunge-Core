@@ -15,5 +15,5 @@
 # vendor/
 
 # idea
-*./idea
+*.idea/
 *./vscode
