@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,6 +14,7 @@ type UserDaoInterface interface {
 	AddUser(user db.User) (db.User, error)
 	UpdateUser(id string, key string, value string) (db.User, error)
 	GetUserByPhone(phone string) (db.User, error)
+	DoesUserExist(phone string) bool
 }
 type NewUserDaoInterface struct {
 	Client *mongo.Client
@@ -34,14 +36,27 @@ func (u NewUserDaoInterface) AddUser(user db.User) (db.User, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	user.ID = primitive.NewObjectID()
+
+	////Save the user details to db //also doubles are checked
+	////layout := "2020-05-16T20:01:26.145Z"
+	//date, err := time.Parse(time.RFC3339, strings.TrimSpace(undate))
+	//if err != nil {
+	//	return db.User{},err
+	//}
+
 	MbungeDb := *u.Client.Database("mbunge").Collection("user")
 
-	res, err := MbungeDb.InsertOne(context.Background(), user)
-	if err != nil {
-		return db.User{}, err
-	}
+	exist := u.DoesUserExist(user.PhoneNumber)
+	if exist {
+		return db.User{}, errors.New("user exist")
+	} else {
+		res, err := MbungeDb.InsertOne(context.Background(), user)
+		if err != nil {
+			return db.User{}, err
+		}
 
-	return findUserById(res.InsertedID.(primitive.ObjectID), u.Client), nil
+		return findUserById(res.InsertedID.(primitive.ObjectID), u.Client), nil
+	}
 }
 func (u NewUserDaoInterface) UpdateUser(id string, key string, value string) (db.User, error) {
 	objID, _ := primitive.ObjectIDFromHex(id)
@@ -73,4 +88,20 @@ func (u NewUserDaoInterface) GetUserByPhone(phone string) (db.User, error) {
 		return db.User{}, err
 	}
 	return user, nil
+}
+func (u NewUserDaoInterface) DoesUserExist(phone string) bool {
+	var result bson.M
+	MbungeDb := *u.Client.Database("mbunge").Collection("user")
+	err := MbungeDb.FindOne(context.Background(), bson.M{
+		"phone_number": phone,
+	}).Decode(&result)
+
+	if err != nil {
+		return false
+	}
+	if len(result) != 0 {
+		return true
+	} else {
+		return false
+	}
 }
