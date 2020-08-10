@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/MbungeApp/mbunge-core/config"
 	"github.com/MbungeApp/mbunge-core/v1/user/handler"
 	"github.com/MbungeApp/mbunge-core/v1/user/repository"
@@ -12,10 +11,10 @@ import (
 )
 
 func main() {
-	client := config.ConnectDB()
-	defer client.Disconnect(context.Background())
-
 	e := echo.New()
+
+	client := config.ConnectDB()
+
 	// middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
