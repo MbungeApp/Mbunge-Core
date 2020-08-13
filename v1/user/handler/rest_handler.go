@@ -24,7 +24,6 @@ func (u *userRestHandler) SignInUser(c echo.Context) error {
 	var userRequest request.LoginRequest
 	var info echo.Map
 	var err error
-	log.Println(info)
 
 	// 1. bind the request payload to a struct
 	err = c.Bind(&info)

@@ -12,6 +12,7 @@ type userRepository struct {
 }
 
 func NewUserRepository(client *mongo.Client) UserRepository {
+
 	userDao := dao.NewUserDaoInterface{
 		Client: client,
 	}
@@ -22,6 +23,7 @@ func NewUserRepository(client *mongo.Client) UserRepository {
 		userDao:   userDao,
 		deviceDao: deviceDao,
 	}
+
 }
 
 // Device implementations
