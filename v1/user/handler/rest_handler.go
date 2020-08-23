@@ -4,6 +4,7 @@ import (
 	"github.com/MbungeApp/mbunge-core/models/request"
 	"github.com/MbungeApp/mbunge-core/v1/user/service"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	ms "github.com/mitchellh/mapstructure"
 	"log"
 	"net/http"
@@ -18,6 +19,7 @@ func NewUserRestHandler(e *echo.Echo, userService service.UserService) {
 	g := e.Group("/api/v1/auth")
 	g.POST("/sign_in", userRestHandler.SignInUser)
 	g.POST("/sign_up", userRestHandler.SignUpUser)
+	g.Use(middleware.JWT([]byte("secret")))
 }
 
 func (u *userRestHandler) SignInUser(c echo.Context) error {
