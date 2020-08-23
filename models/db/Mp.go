@@ -16,3 +16,9 @@ type MP struct {
 	Bio           string             `json:"bio" bson:"bio"`
 	Images        []string           `json:"images" bson:"images"`
 }
+
+type MpLive struct {
+	ID      primitive.ObjectID `json:"id" bson:"_id"`
+	MpId    string             `json:"mp_id" bson:"mp_id"`
+	Payload string             `json:"payload" bson:"payload"`
+}
