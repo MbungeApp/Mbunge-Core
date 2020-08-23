@@ -4,8 +4,10 @@ import (
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"github.com/MbungeApp/mbunge-core/models/request"
 	"github.com/MbungeApp/mbunge-core/models/response"
+	"github.com/MbungeApp/mbunge-core/utils"
 	"github.com/MbungeApp/mbunge-core/v1/user/repository"
 	"log"
+	"math/rand"
 )
 
 type userServiceImpl struct {
@@ -36,11 +38,11 @@ func (u userServiceImpl) RegisterUser(regRequest request.RegisterRequest) (respo
 		}
 	}()
 
-	response := response.RegisterResponse{
-		Code: 1111,
+	res := response.RegisterResponse{
+		Code: rand.Intn(9999),
 		User: userres,
 	}
-	return response, nil
+	return res, nil
 }
 
 func (u userServiceImpl) LoginUser(request request.LoginRequest) (response.LoginResponse, error) {
@@ -51,21 +53,30 @@ func (u userServiceImpl) LoginUser(request request.LoginRequest) (response.Login
 	if err != nil {
 		return response.LoginResponse{}, err
 	}
-	if user.Password == password {
-		response := response.LoginResponse{
-			Token: "1234567", //TODO
+	match, err := utils.ComparePasswordAndHash(user.Password, password)
+	if err != nil {
+		return response.LoginResponse{}, err
+	}
+	if match {
+		// new token
+		token, err := utils.GenerateToken(user.EmailAddress)
+		if err != nil {
+			return response.LoginResponse{}, err
+		}
+		res := response.LoginResponse{
+			Token: token,
 			User:  user,
 		}
-		return response, nil
+		return res, nil
 	} else {
 		return response.LoginResponse{}, nil
 	}
 }
 
 func (u userServiceImpl) VerifyAccount(phone string) error {
-	panic("implement me")
+	panic("implement me" + phone)
 }
 
 func (u userServiceImpl) PasswordReset(phone string) error {
-	panic("implement me")
+	panic("implement me" + phone)
 }
