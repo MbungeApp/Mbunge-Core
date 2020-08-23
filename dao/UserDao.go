@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/MbungeApp/mbunge-core/models/db"
+	"github.com/MbungeApp/mbunge-core/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,7 +16,9 @@ type UserDaoInterface interface {
 	UpdateUser(id string, key string, value string) (db.User, error)
 	GetUserByPhone(phone string) (db.User, error)
 	DoesUserExist(phone string) bool
+	VerifyUser(userid string) error
 }
+
 type NewUserDaoInterface struct {
 	Client *mongo.Client
 }
@@ -37,15 +40,13 @@ func (u NewUserDaoInterface) AddUser(user db.User) (db.User, error) {
 	user.UpdatedAt = time.Now()
 	user.ID = primitive.NewObjectID()
 
-	////Save the user details to db //also doubles are checked
-	////layout := "2020-05-16T20:01:26.145Z"
-	//date, err := time.Parse(time.RFC3339, strings.TrimSpace(undate))
-	//if err != nil {
-	//	return db.User{},err
-	//}
+	hashedPassword, err := utils.GenerateHash(user.Password)
+	if err != nil {
+		return db.User{}, err
+	}
+	user.Password = hashedPassword
 
 	MbungeDb := *u.Client.Database("mbunge").Collection("user")
-
 	exist := u.DoesUserExist(user.PhoneNumber)
 	if exist {
 		return db.User{}, errors.New("user exist")
@@ -104,4 +105,20 @@ func (u NewUserDaoInterface) DoesUserExist(phone string) bool {
 	} else {
 		return false
 	}
+}
+func (u NewUserDaoInterface) VerifyUser(userid string) error {
+
+	objID, _ := primitive.ObjectIDFromHex(userid)
+	filter := bson.D{{"_id", objID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{"verified", true}}}}
+	MbungeDb := *u.Client.Database("mbunge").Collection("user")
+	_, err := MbungeDb.UpdateOne(
+		context.Background(),
+		filter,
+		update,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
