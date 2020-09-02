@@ -15,7 +15,7 @@ func NewEventService(eventRepository repository.NewsRepository) NewsService {
 
 // Implemented methods
 func (e eventServiceImpl) AllNews() ([]db.EventNew, error) {
-	events, err := e.AllNews()
+	events, err := e.newsRepo.GetAllNews()
 	if err != nil {
 		return nil, err
 	}
