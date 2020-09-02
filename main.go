@@ -14,6 +14,10 @@ import (
 	participationRepo "github.com/MbungeApp/mbunge-core/v1/participation/repository"
 	participationService "github.com/MbungeApp/mbunge-core/v1/participation/service"
 
+	mpHandler "github.com/MbungeApp/mbunge-core/v1/mp/handler"
+	mpRepo "github.com/MbungeApp/mbunge-core/v1/mp/repository"
+	mpService "github.com/MbungeApp/mbunge-core/v1/mp/service"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"net/http"
@@ -45,6 +49,11 @@ func main() {
 	participationservice := participationService.NewParticipationServiceImpl(participationRepository)
 	participationHandler.NewParticipationRestHandler(e, participationservice)
 	participationHandler.NewWebsocketHandler(e, participationservice)
+
+	// MP
+	mpRepository := mpRepo.NewMpRepository(client)
+	mpservice := mpService.NewMpService(mpRepository)
+	mpHandler.NewMpRestHandler(e, mpservice)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
