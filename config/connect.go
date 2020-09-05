@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2020.
+ * MbungeApp Inc all rights reserved
+ */
+
 package config
 
 import (
@@ -13,7 +18,7 @@ import (
 )
 
 const (
-	configPath = "config/config.ini"
+	configPath = "/app/config/config.ini"
 )
 
 var dbUrl, sentryKey string
