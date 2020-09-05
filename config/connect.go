@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	configPath = "/app/config/config.ini"
+	configPath = "config/config.ini"
 )
 
 var dbUrl, sentryKey string
