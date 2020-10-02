@@ -10,6 +10,7 @@ import (
 	userHandler "github.com/MbungeApp/mbunge-core/v1/user/handler"
 	userRepo "github.com/MbungeApp/mbunge-core/v1/user/repository"
 	userService "github.com/MbungeApp/mbunge-core/v1/user/service"
+	"net"
 
 	eventHandler "github.com/MbungeApp/mbunge-core/v1/news/handler"
 	eventRepo "github.com/MbungeApp/mbunge-core/v1/news/repository"
@@ -62,7 +63,8 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	l, err := net.Listen("tcp", ":5000")
+
+	l, err := net.Listen("tcp", "0000:5000")
 	if err != nil {
 		e.Logger.Fatal(l)
 	}
