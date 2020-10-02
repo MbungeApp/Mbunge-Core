@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	configPath = "config/config.ini"
+	configPath = "/home/pato/projects/Mbunge-Core/config/config.ini" // "config/config.ini"
 )
 
 var dbUrl, sentryKey string
