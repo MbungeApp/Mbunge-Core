@@ -16,11 +16,14 @@ func TestConnectDB(t *testing.T) {
 		name string
 		want *mongo.Client
 	}{
-		// TODO: Add test cases.
+		{
+			name:"database connections",
+			want: ConnectDB(),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ConnectDB(); !reflect.DeepEqual(got, tt.want) {
+			if got := ConnectDB(); !reflect.DeepEqual(reflect.TypeOf(got), reflect.TypeOf(tt.want)) {
 				t.Errorf("ConnectDB() = %v, want %v", got, tt.want)
 			}
 		})
@@ -35,7 +38,12 @@ func TestErrorReporter(t *testing.T) {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
+		{
+			name: "test sentry reporter",
+			args: args{
+				report: "test report",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,7 +62,14 @@ func TestGetKey(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "test db config",
+			args: args{
+				section: "mongodb-dev",
+				key:     "url",
+			},
+			want: "mongodb://localhost:27017",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
