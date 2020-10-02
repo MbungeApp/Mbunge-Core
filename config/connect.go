@@ -81,12 +81,12 @@ func ConnectDB() *mongo.Client {
 		log.Fatal(err)
 	}
 	log.Println("Connected")
-	defer func() {
-		log.Println("DB disconnected from main")
-		err := client.Disconnect(context.Background())
-		if err != nil {
-			log.Println("db disc err ", err)
-		}
-	}()
+//	defer func() {
+//		log.Println("DB disconnected from main")
+//		err := client.Disconnect(context.Background())
+//		if err != nil {
+//			log.Println("db disc err ", err)
+//		}
+//	}()
 	return client
 }
