@@ -64,7 +64,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	l, err := net.Listen("tcp", "0000:5000")
+	l, err := net.Listen("tcp4", ":5000")
 	if err != nil {
 		e.Logger.Fatal(l)
 	}
