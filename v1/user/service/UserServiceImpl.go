@@ -58,7 +58,7 @@ func (u userServiceImpl) LoginUser(request request.LoginRequest) (response.Login
 	if err != nil {
 		return response.LoginResponse{}, err
 	}
-	match, err := utils.ComparePasswordAndHash(user.Password, password)
+	match, err := utils.ComparePasswordAndHash(password, user.Password)
 	if err != nil {
 		return response.LoginResponse{}, err
 	}
