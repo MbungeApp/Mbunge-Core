@@ -9,7 +9,6 @@ import (
 	"github.com/MbungeApp/mbunge-core/models/request"
 	"github.com/MbungeApp/mbunge-core/v1/participation/service"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	ms "github.com/mitchellh/mapstructure"
 	"log"
 	"net/http"
@@ -24,7 +23,7 @@ func NewParticipationRestHandler(e *echo.Echo, participationService service.Part
 
 	// semantic versioning of api !!
 	g := e.Group("/api/v1/participation")
-	g.Use(middleware.JWT([]byte("secret")))
+	//g.Use(middleware.JWT([]byte("secret")))
 	g.GET("/", participationRestHandler.AllParticipation)
 	g.GET("/response/:id", participationRestHandler.AllResponseByParticipation)
 	g.POST("/response/add", participationRestHandler.AddResponse)

@@ -8,7 +8,7 @@ package handler
 import (
 	"github.com/MbungeApp/mbunge-core/v1/news/service"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	//"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ type eventsRestHandler struct {
 func NewEventRestHandler(e *echo.Echo, eventService service.NewsService) {
 	eventsRestHandler := &eventsRestHandler{eventService: eventService}
 	g := e.Group("/api/v1/events")
-	g.Use(middleware.JWT([]byte("secret")))
+	//g.Use(middleware.JWT([]byte("secret")))
 	g.GET("/", eventsRestHandler.allEvents)
 }
 
