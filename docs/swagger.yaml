@@ -1,0 +1,74 @@
+host: localhost:5000
+info:
+  contact:
+    email: 858wpwaweru@gmail.com
+    name: API Support
+    url: http://dashboard.mbungeapp.tech/support
+  description: Version one of the api.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://dashboard.mbungeapp.tech/terms/
+  title: Mbunge App API
+  version: "1.0"
+paths:
+  /api/v1/auth/sign_in:
+    post:
+      consumes:
+      - application/json
+      description: register user
+      parameters:
+      - description: "254727751832"
+        in: body
+        name: phone
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok" response.LoginResponse
+          schema:
+            type: object
+        "400":
+          description: err_code：10002 参数错误； err_code：10003 校验错误
+          schema:
+            type: string
+        "401":
+          description: err_code：10001 登录失败
+          schema:
+            type: string
+        "500":
+          description: err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常
+          schema:
+            type: string
+      summary: Sign-in User
+  /api/v1/participation/:
+    get:
+      consumes:
+      - application/json
+      description: get all
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok" []db.Participation
+          schema:
+            items:
+              type: array
+            type: array
+        "400":
+          description: err_code：10002 参数错误； err_code：10003 校验错误
+          schema:
+            type: string
+        "401":
+          description: err_code：10001 登录失败
+          schema:
+            type: string
+        "500":
+          description: err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常
+          schema:
+            type: string
+      summary: All Partipations
+swagger: "2.0"

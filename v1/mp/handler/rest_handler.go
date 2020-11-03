@@ -6,10 +6,11 @@
 package handler
 
 import (
-	"github.com/MbungeApp/mbunge-core/v1/mp/service"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	"net/http"
+
+	"github.com/MbungeApp/mbunge-core/v1/mp/service"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type mpRestHandler struct {

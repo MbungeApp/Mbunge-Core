@@ -6,10 +6,10 @@
 package handler
 
 import (
-	"github.com/MbungeApp/mbunge-core/v1/news/service"
-	"github.com/labstack/echo"
-	//"github.com/labstack/echo/middleware"
 	"net/http"
+
+	"github.com/MbungeApp/mbunge-core/v1/news/service"
+	"github.com/labstack/echo/v4"
 )
 
 type eventsRestHandler struct {

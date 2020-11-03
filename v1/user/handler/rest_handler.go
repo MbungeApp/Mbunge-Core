@@ -6,13 +6,14 @@
 package handler
 
 import (
-	"github.com/MbungeApp/mbunge-core/models/request"
-	"github.com/MbungeApp/mbunge-core/v1/user/service"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	ms "github.com/mitchellh/mapstructure"
 	"log"
 	"net/http"
+
+	"github.com/MbungeApp/mbunge-core/models/request"
+	"github.com/MbungeApp/mbunge-core/v1/user/service"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	ms "github.com/mitchellh/mapstructure"
 )
 
 type userRestHandler struct {
@@ -27,6 +28,16 @@ func NewUserRestHandler(e *echo.Echo, userService service.UserService) {
 	g.Use(middleware.JWT([]byte("secret")))
 }
 
+// @Summary Sign-in User
+// @Description register user
+// @Produce json
+// @Accept json
+// @Param phone body string true "254727751832", password body string true "1234567890"
+// @Success 200 {object} object "ok" response.LoginResponse
+// @Failure 400 {string} string "err_code：10002 参数错误； err_code：10003 校验错误"
+// @Failure 401 {string} string "err_code：10001 登录失败"
+// @Failure 500 {string} string "err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常"
+// @Router /api/v1/auth/sign_in [post]
 func (u *userRestHandler) SignInUser(c echo.Context) error {
 	var userRequest request.LoginRequest
 	var info echo.Map

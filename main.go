@@ -6,11 +6,12 @@
 package main
 
 import (
+	"net"
+
 	"github.com/MbungeApp/mbunge-core/config"
 	userHandler "github.com/MbungeApp/mbunge-core/v1/user/handler"
 	userRepo "github.com/MbungeApp/mbunge-core/v1/user/repository"
 	userService "github.com/MbungeApp/mbunge-core/v1/user/service"
-	"net"
 
 	eventHandler "github.com/MbungeApp/mbunge-core/v1/news/handler"
 	eventRepo "github.com/MbungeApp/mbunge-core/v1/news/repository"
@@ -24,11 +25,27 @@ import (
 	mpRepo "github.com/MbungeApp/mbunge-core/v1/mp/repository"
 	mpService "github.com/MbungeApp/mbunge-core/v1/mp/service"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	"net/http"
+
+	_ "github.com/MbungeApp/mbunge-core/docs"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// @title Mbunge App API
+// @version 1.0
+// @description Version one of the api.
+// @termsOfService http://dashboard.mbungeapp.tech/terms/
+
+// @contact.name API Support
+// @contact.url http://dashboard.mbungeapp.tech/support
+// @contact.email 858wpwaweru@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:5000
 func main() {
 	e := echo.New()
 
@@ -60,6 +77,9 @@ func main() {
 	mpRepository := mpRepo.NewMpRepository(client)
 	mpservice := mpService.NewMpService(mpRepository)
 	mpHandler.NewMpRestHandler(e, mpservice)
+
+	// Swagger docs
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

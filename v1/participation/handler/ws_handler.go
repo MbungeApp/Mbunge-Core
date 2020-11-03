@@ -8,10 +8,11 @@ package handler
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/MbungeApp/mbunge-core/v1/participation/service"
 	"github.com/gorilla/websocket"
-	"github.com/labstack/echo"
-	"net/http"
+	"github.com/labstack/echo/v4"
 )
 
 type participationWSHandler struct {
