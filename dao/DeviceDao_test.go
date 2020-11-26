@@ -1,8 +1,13 @@
 package dao
 
 import (
+	"github.com/MbungeApp/mbunge-core/config"
+	"github.com/MbungeApp/mbunge-core/models/db"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestNewDeviceDaoInterface_AddDevice(t *testing.T) {
@@ -10,16 +15,26 @@ func TestNewDeviceDaoInterface_AddDevice(t *testing.T) {
 		Client *mongo.Client
 	}
 	type args struct {
-		device Device
+		device db.Device
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    Device
+		want    db.Device
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "add device",
+			fields: fields{Client: config.ConnectDB()},
+			args: args{device: db.Device{
+				UserId:    "user_id",
+				Type:      "app",
+				FCMToken:  "",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -49,10 +64,26 @@ func TestNewDeviceDaoInterface_GetDevice(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    Device
+		want    db.Device
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "get device",
+			fields: fields{
+				Client: config.ConnectDB(),
+			},
+			args: args{
+				userId: "user_id",
+			},
+			want: db.Device{
+				UserId:    "user_id",
+				Type:      "app",
+				FCMToken:  "",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -84,10 +115,27 @@ func TestNewDeviceDaoInterface_UpdateDevice(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    Device
+		want    db.Device
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+
+		{
+			name: "Update device",
+			fields: fields{
+				Client: config.ConnectDB(),
+			},
+			args: args{
+				id: "", //TODO
+			},
+			want: db.Device{
+				UserId:    "user_id",
+				Type:      "app",
+				FCMToken:  "",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -128,13 +176,13 @@ func Test_deviceCollection(t *testing.T) {
 
 func Test_findDeviceById(t *testing.T) {
 	type args struct {
-		id     ObjectID
+		id     primitive.ObjectID
 		client *mongo.Client
 	}
 	tests := []struct {
 		name string
 		args args
-		want Device
+		want db.Device
 	}{
 		// TODO: Add test cases.
 	}
