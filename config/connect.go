@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	configPath = "/var/www/go/Mbunge-Core/config/config.ini" // "config/config.ini"
+	configPath = "config/config.ini" //"/var/www/go/Mbunge-Core/config/config.ini" // "config/config.ini"
 )
 
 var dbUrl, sentryKey string

@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2020.
- * MbungeApp Inc all rights reserved
- */
-
 package dao
 
 import (
