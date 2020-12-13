@@ -15,7 +15,7 @@ import (
 
 type ResponseDao interface {
 	AddResponse(response db.Response) error
-	GetAllResponseByParti(participationID string) []db.Participation
+	GetAllResponseByParti(participationID string) []db.Response
 	DeleteResponse(responseId string) error
 	MostResponse()
 }
