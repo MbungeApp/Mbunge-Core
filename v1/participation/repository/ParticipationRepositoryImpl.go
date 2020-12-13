@@ -31,7 +31,7 @@ func (p participationRepositoryImpl) GetAllParticipation() []db.Participation {
 	return p.participationDao.GetAllParticipation()
 }
 
-func (p participationRepositoryImpl) GetResponsesByParticipationID(participationID string) []db.Participation {
+func (p participationRepositoryImpl) GetResponsesByParticipationID(participationID string) []db.Response {
 	return p.responseDao.GetAllResponseByParti(participationID)
 }
 

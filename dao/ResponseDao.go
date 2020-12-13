@@ -37,8 +37,8 @@ func (r NewResponseDao) AddResponse(response db.Response) error {
 	return nil
 }
 
-func (r NewResponseDao) GetAllResponseByParti(participationID string) []db.Participation {
-	var participation []db.Participation
+func (r NewResponseDao) GetAllResponseByParti(participationID string) []db.Response {
+	var responses []db.Response
 
 	cursor, err := responseCollection(r.Client).Find(context.Background(), bson.D{
 		{"participation_id", participationID},
@@ -46,11 +46,11 @@ func (r NewResponseDao) GetAllResponseByParti(participationID string) []db.Parti
 	if err != nil {
 		return nil
 	}
-	err = cursor.All(context.Background(), &participation)
+	err = cursor.All(context.Background(), &responses)
 	if err != nil {
 		return nil
 	}
-	return participation
+	return responses
 }
 
 func (r NewResponseDao) DeleteResponse(responseId string) error {

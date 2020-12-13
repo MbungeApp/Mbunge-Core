@@ -12,7 +12,7 @@ import (
 
 type ParticipationRepository interface {
 	GetAllParticipation() []db.Participation
-	GetResponsesByParticipationID(participationID string) []db.Participation
+	GetResponsesByParticipationID(participationID string) []db.Response
 	AddResponses(response db.Response) error
 	DeleteResponses(responseId string) error
 	DBChanges() (*mongo.ChangeStream, error)
