@@ -41,7 +41,7 @@ func (p participationServiceImpl) AddResponse(res request.ResponseRequest) error
 	return nil
 }
 
-func (p participationServiceImpl) GetAllResponseByParti(participationId string) []db.Participation {
+func (p participationServiceImpl) GetAllResponseByParti(participationId string) []db.Response {
 	return p.participationRepository.GetResponsesByParticipationID(participationId)
 }
 
