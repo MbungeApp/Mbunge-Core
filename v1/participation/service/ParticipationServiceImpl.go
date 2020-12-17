@@ -8,6 +8,7 @@ package service
 import (
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"github.com/MbungeApp/mbunge-core/models/request"
+	"github.com/MbungeApp/mbunge-core/models/response"
 	"github.com/MbungeApp/mbunge-core/v1/participation/repository"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -26,19 +27,20 @@ func (p participationServiceImpl) GetAllParticipation() []db.Participation {
 	return p.participationRepository.GetAllParticipation()
 }
 
-func (p participationServiceImpl) AddResponse(res request.ResponseRequest) error {
-	response := db.Response{
+func (p participationServiceImpl) AddResponse(res request.ResponseRequest) (response.AddResponseResponse, error) {
+
+	resx := db.Response{
 		UserId:          res.UserId,
 		ParticipationId: res.ParticipationId,
 		Body:            res.Body,
 		CreatedAt:       time.Now(),
 		UpdatedAt:       time.Now(),
 	}
-	err := p.participationRepository.AddResponses(response)
+	callback, err := p.participationRepository.AddResponses(resx)
 	if err != nil {
-		return err
+		return response.AddResponseResponse{}, err
 	}
-	return nil
+	return callback, nil
 }
 
 func (p participationServiceImpl) GetAllResponseByParti(participationId string) []db.Response {
