@@ -17,7 +17,7 @@ func TestConnectDB(t *testing.T) {
 		want *mongo.Client
 	}{
 		{
-			name:"database connections",
+			name: "database connections",
 			want: ConnectDB(),
 		},
 	}
