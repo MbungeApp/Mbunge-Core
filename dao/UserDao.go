@@ -20,6 +20,7 @@ type UserDaoInterface interface {
 	AddUser(user db.User) (db.User, error)
 	UpdateUser(id string, key string, value string) (db.User, error)
 	GetUserByPhone(phone string) (db.User, error)
+	GetUserById(userId string) (db.User, error)
 	DoesUserExist(phone string) bool
 	VerifyUser(userid string) error
 }
@@ -95,6 +96,21 @@ func (u NewUserDaoInterface) GetUserByPhone(phone string) (db.User, error) {
 	}
 	return user, nil
 }
+
+func (u NewUserDaoInterface) GetUserById(userId string) (db.User, error) {
+	var user db.User
+
+	MbungeDb := *u.Client.Database("mbunge").Collection("user")
+	objectID, _ := primitive.ObjectIDFromHex(userId)
+	err := MbungeDb.FindOne(context.Background(), bson.M{
+		"_id": objectID,
+	}).Decode(&user)
+	if err != nil {
+		return db.User{}, nil
+	}
+	return user, nil
+}
+
 func (u NewUserDaoInterface) DoesUserExist(phone string) bool {
 	var result bson.M
 	MbungeDb := *u.Client.Database("mbunge").Collection("user")
