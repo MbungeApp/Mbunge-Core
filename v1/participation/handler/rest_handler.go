@@ -69,11 +69,11 @@ func (p *participationRestHandler) AddResponse(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
-	err = p.participationService.AddResponse(responseReq)
+	res, err := p.participationService.AddResponse(responseReq)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-	return c.JSON(http.StatusCreated, "")
+	return c.JSON(http.StatusCreated, res)
 }
 func (p *participationRestHandler) DeleteResponse(c echo.Context) error {
 	responseID := c.Param("response_id")
