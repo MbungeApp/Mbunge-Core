@@ -15,7 +15,7 @@ import (
 type ParticipationService interface {
 	GetAllParticipation() []db.Participation
 	AddResponse(res request.ResponseRequest) (response.AddResponseResponse, error)
-	GetAllResponseByParti(participationId string) []db.Response
+	GetAllResponseByParti(participationId string) []response.AddResponseResponse
 	DeleteResponse(responseId string) error
 	ChangeStreams() (*mongo.ChangeStream, error)
 }

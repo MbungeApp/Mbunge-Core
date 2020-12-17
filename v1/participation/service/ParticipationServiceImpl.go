@@ -43,7 +43,7 @@ func (p participationServiceImpl) AddResponse(res request.ResponseRequest) (resp
 	return callback, nil
 }
 
-func (p participationServiceImpl) GetAllResponseByParti(participationId string) []db.Response {
+func (p participationServiceImpl) GetAllResponseByParti(participationId string) []response.AddResponseResponse {
 	return p.participationRepository.GetResponsesByParticipationID(participationId)
 }
 

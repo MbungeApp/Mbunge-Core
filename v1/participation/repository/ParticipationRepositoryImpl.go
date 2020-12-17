@@ -6,6 +6,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/MbungeApp/mbunge-core/dao"
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"github.com/MbungeApp/mbunge-core/models/response"
@@ -35,8 +36,26 @@ func (p participationRepositoryImpl) GetAllParticipation() []db.Participation {
 	return p.participationDao.GetAllParticipation()
 }
 
-func (p participationRepositoryImpl) GetResponsesByParticipationID(participationID string) []db.Response {
-	return p.responseDao.GetAllResponseByParti(participationID)
+func (p participationRepositoryImpl) GetResponsesByParticipationID(participationID string) []response.AddResponseResponse {
+	fmt.Println("Shit 1")
+	var results []response.AddResponseResponse
+	responses := p.responseDao.GetAllResponseByParti(participationID)
+	fmt.Println("Shit 2")
+	for index, element := range responses {
+		fmt.Println(index)
+		user, _ := p.userDao.GetUserById(element.UserId)
+		appendWhat := response.AddResponseResponse{
+			ID:              element.ID,
+			UserId:          element.UserId,
+			ParticipationId: element.ParticipationId,
+			Body:            element.Body,
+			CreatedAt:       element.CreatedAt,
+			UpdatedAt:       element.UpdatedAt,
+			User:            user,
+		}
+		results = append(results, appendWhat)
+	}
+	return results
 }
 
 func (p participationRepositoryImpl) AddResponses(resp db.Response) (response.AddResponseResponse, error) {
