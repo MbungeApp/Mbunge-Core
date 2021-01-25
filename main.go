@@ -25,6 +25,9 @@ import (
 	mpRepo "github.com/MbungeApp/mbunge-core/v1/mp/repository"
 	mpService "github.com/MbungeApp/mbunge-core/v1/mp/service"
 
+	_dashboardHandler "github.com/MbungeApp/mbunge-core/v1/dashboard/handler"
+	_dashboardService "github.com/MbungeApp/mbunge-core/v1/dashboard/service"
+
 	"net/http"
 
 	_ "github.com/MbungeApp/mbunge-core/docs"
@@ -77,6 +80,10 @@ func main() {
 	mpRepository := mpRepo.NewMpRepository(client)
 	mpservice := mpService.NewMpService(mpRepository)
 	mpHandler.NewMpRestHandler(e, mpservice)
+
+	// Dashboard
+	dashboardService := _dashboardService.NewDashboardServiceImpl(client)
+	_dashboardHandler.NewDashboardHandler(e, dashboardService)
 
 	// Swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
