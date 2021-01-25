@@ -9,6 +9,7 @@ import (
 	"context"
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
@@ -16,8 +17,11 @@ import (
 
 type ParticipationDaoInterface interface {
 	GetAllParticipation() []db.Participation
-	GetParticipationByID() db.Participation
+	GetParticipationByID(participationID string) (db.Participation, error)
 	ParticipationChanges() (*mongo.ChangeStream, error)
+	CreateParticipation(participation db.Participation) error
+	UpdateParticipation(id string, key string, value string) error
+	DeleteParticipation(participationID string) error
 }
 
 type NewParticipationDaoInterface struct {
@@ -41,6 +45,20 @@ func (p NewParticipationDaoInterface) GetAllParticipation() []db.Participation {
 	return participation
 }
 
+func (p NewParticipationDaoInterface) GetParticipationByID(participationID string) (db.Participation, error) {
+	objectID, _ := primitive.ObjectIDFromHex(participationID)
+	var participation db.Participation
+
+	err := participationCollection(p.Client).FindOne(context.Background(), bson.D{{"_id", objectID}}).Decode(&participation)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return db.Participation{}, err
+		}
+		return db.Participation{}, err
+	}
+	return participation, nil
+
+}
 func (p NewParticipationDaoInterface) ParticipationChanges() (*mongo.ChangeStream, error) {
 	matchStage1 := bson.D{{"$match", bson.D{{"operationType", "insert"}}}}
 	matchStage2 := bson.D{{"$match", bson.D{{"operationType", "update"}}}}
@@ -55,7 +73,39 @@ func (p NewParticipationDaoInterface) ParticipationChanges() (*mongo.ChangeStrea
 	}
 	return changeStream, nil
 }
+func (p NewParticipationDaoInterface) CreateParticipation(participation db.Participation) error {
+	participation.CreatedAt = time.Now()
+	participation.UpdatedAt = time.Now()
+	participation.ID = primitive.NewObjectID()
+	_, err := participationCollection(p.Client).InsertOne(context.Background(), participation)
 
-//func (p NewParticipationDaoInterface) GetParticipationByID() db.Participation  {
-//
-//}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (p NewParticipationDaoInterface) UpdateParticipation(id string, key string, value string) error {
+	objID, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{"_id", objID}}
+	update := bson.D{{Key: "$set", Value: bson.M{key: value, "updated_at": time.Now()}}}
+
+	_, err := participationCollection(p.Client).UpdateOne(
+		context.Background(),
+		filter,
+		update,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (p NewParticipationDaoInterface) DeleteParticipation(participationID string) error {
+	objectID, _ := primitive.ObjectIDFromHex(participationID)
+	_, err := participationCollection(p.Client).DeleteOne(context.Background(), bson.M{
+		"_id": objectID,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
