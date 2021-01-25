@@ -13,6 +13,7 @@ import (
 type Response struct {
 	ID              primitive.ObjectID `json:"id" bson:"_id"`
 	UserId          string             `json:"user_id" bson:"user_id"`
+	UserName        string             `json:"user_name" bson:"user_name"`
 	ParticipationId string             `json:"participation_id" bson:"participation_id"`
 	Body            string             `json:"body" bson:"body"`
 	CreatedAt       time.Time          `json:"created_at" bson:"created_at" form:"created_at"`
