@@ -15,13 +15,13 @@ import (
 
 type participationRepositoryImpl struct {
 	participationDao dao.NewParticipationDaoInterface
-	responseDao      dao.NewResponseDao
+	responseDao      dao.NewResponseDaoInterface
 	userDao          dao.NewUserDaoInterface
 }
 
 func NewParticipationRepositoryImpl(client *mongo.Client) ParticipationRepository {
 	participationDao := dao.NewParticipationDaoInterface{Client: client}
-	responseDao := dao.NewResponseDao{Client: client}
+	responseDao := dao.NewResponseDaoInterface{Client: client}
 	userDao := dao.NewUserDaoInterface{Client: client}
 
 	return &participationRepositoryImpl{
