@@ -16,6 +16,7 @@ import (
 )
 
 type ParticipationDaoInterface interface {
+	TotalParticipations() int
 	GetAllParticipation() []db.Participation
 	GetParticipationByID(participationID string) (db.Participation, error)
 	ParticipationChanges() (*mongo.ChangeStream, error)
@@ -30,6 +31,19 @@ type NewParticipationDaoInterface struct {
 
 func participationCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("mbunge").Collection("participation")
+}
+
+func (p NewParticipationDaoInterface) TotalParticipations() int {
+	var participation []db.Participation
+	cursor, err := participationCollection(p.Client).Find(context.Background(), bson.M{})
+	if err != nil {
+		return 0
+	}
+	err = cursor.All(context.Background(), &participation)
+	if err != nil {
+		return 0
+	}
+	return len(participation)
 }
 
 func (p NewParticipationDaoInterface) GetAllParticipation() []db.Participation {
