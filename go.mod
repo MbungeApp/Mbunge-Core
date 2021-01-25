@@ -7,9 +7,9 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getsentry/sentry-go v0.7.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/mitchellh/mapstructure v1.3.3
+	github.com/ryankurte/go-mapbox v0.4.4
 	github.com/sendgrid/rest v2.6.2+incompatible // indirect
 	github.com/sendgrid/sendgrid-go v3.7.0+incompatible
 	github.com/swaggo/echo-swagger v1.0.0
