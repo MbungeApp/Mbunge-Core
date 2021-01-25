@@ -9,6 +9,7 @@ import (
 type AddResponseResponse struct {
 	ID              primitive.ObjectID `json:"id" `
 	UserId          string             `json:"user_id"`
+	UserName        string             `json:"user_name"`
 	ParticipationId string             `json:"participation_id" `
 	Body            string             `json:"body" bson:"body"`
 	CreatedAt       time.Time          `json:"created_at" `
