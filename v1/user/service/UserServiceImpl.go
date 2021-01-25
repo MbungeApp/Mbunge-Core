@@ -12,7 +12,6 @@ import (
 	"github.com/MbungeApp/mbunge-core/utils"
 	"github.com/MbungeApp/mbunge-core/v1/user/repository"
 	"log"
-	"math/rand"
 )
 
 type userServiceImpl struct {
@@ -44,7 +43,7 @@ func (u userServiceImpl) RegisterUser(regRequest request.RegisterRequest) (respo
 	}()
 
 	res := response.RegisterResponse{
-		Code: rand.Intn(9999),
+		Code: utils.GenerateOtp(),
 		User: userres,
 	}
 	return res, nil

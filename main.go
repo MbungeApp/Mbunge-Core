@@ -50,6 +50,7 @@ import (
 
 // @host localhost:5000
 func main() {
+
 	e := echo.New()
 
 	client := config.ConnectDB()

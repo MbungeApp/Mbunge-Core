@@ -7,8 +7,10 @@ import (
 	"github.com/MbungeApp/mbunge-core/models/request"
 	"github.com/MbungeApp/mbunge-core/models/response"
 	"github.com/MbungeApp/mbunge-core/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"sort"
+	"time"
 )
 
 type dashboardServiceImpl struct {
@@ -16,6 +18,8 @@ type dashboardServiceImpl struct {
 	responseDao      dao.ResponseDaoInterface
 	usersDao         dao.UserDaoInterface
 	newsEventsDao    dao.NewsDaoInterface
+	mpDao            dao.MPDaoInterface
+	managerDao       dao.ManagementDaoInterface
 }
 
 // NewDashboardServiceImpl ..
@@ -29,6 +33,12 @@ func NewDashboardServiceImpl(client *mongo.Client) DashboardServices {
 	newDao := dao.NewEventDaoInterface{
 		Client: client,
 	}
+	mpDao := dao.NewMPDaoInterface{
+		Client: client,
+	}
+	managerDao := dao.NewManagementDaoInterface{
+		Client: client,
+	}
 	userDao := dao.NewUserDaoInterface{Client: client}
 
 	return &dashboardServiceImpl{
@@ -36,8 +46,14 @@ func NewDashboardServiceImpl(client *mongo.Client) DashboardServices {
 		responseDao:      resDao,
 		usersDao:         userDao,
 		newsEventsDao:    newDao,
+		mpDao:            mpDao,
+		managerDao:       managerDao,
 	}
 }
+
+// ****************************
+// Metrics
+// ****************************
 func (d dashboardServiceImpl) GetMetrics() response.Metrics {
 	var geoCodeLocations []response.UserLocation
 	card := response.Card{
@@ -78,14 +94,14 @@ func (d dashboardServiceImpl) GetMetrics() response.Metrics {
 	}
 	return metrics
 }
-
 func contains(s []string, searchterm string) bool {
 	i := sort.SearchStrings(s, searchterm)
 	return i < len(s) && s[i] == searchterm
 }
 
+// ****************************
 // EVENTS
-
+// ****************************
 func (d dashboardServiceImpl) ViewAllEvents() ([]db.EventNew, error) {
 	events, err := d.newsEventsDao.ReadNews()
 	if err != nil {
@@ -135,6 +151,197 @@ func (d dashboardServiceImpl) EditEvent(id string, event *request.EventRequest) 
 }
 func (d dashboardServiceImpl) DeleteEvent(id string) error {
 	err := d.newsEventsDao.DeleteNews(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ****************************
+// MPs
+// ****************************
+func (d dashboardServiceImpl) ViewAllMps() ([]db.MP, error) {
+	mps, err := d.mpDao.GetAllMps()
+	if err != nil {
+		return nil, err
+	}
+	return mps, nil
+}
+
+func (d dashboardServiceImpl) ViewMpById(id string) db.MP {
+	mp := d.mpDao.ReadOneMp(id)
+	return mp
+}
+
+func (d dashboardServiceImpl) AddMp(mp *request.MpRequest) error {
+	layout := "2006-01-02"
+	parsedDOB, err := time.Parse(layout, mp.DateOfBirth)
+
+	mpDb := db.MP{
+		Name:          mp.Name,
+		Image:         mp.Picture,
+		Constituency:  mp.Constituency,
+		County:        mp.County,
+		MartialStatus: mp.MartialStatus,
+		DateBirth:     parsedDOB,
+		Bio:           mp.Bio,
+		Images:        nil,
+	}
+
+	err = d.mpDao.CreateMP(mpDb)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d dashboardServiceImpl) EditMp(id string, mp *request.MpRequest) error {
+	layout := "2006-01-02"
+	parsedDOB, _ := time.Parse(layout, mp.DateOfBirth)
+	originalMp := d.mpDao.ReadOneMp(id)
+
+	if mp.Name != originalMp.Name {
+		err := d.mpDao.UpdateMPs(id, "name", mp.Name)
+		if err != nil {
+			return nil
+		}
+	} else if mp.Bio != originalMp.Bio {
+		err := d.mpDao.UpdateMPs(id, "bio", mp.Bio)
+		if err != nil {
+			return nil
+		}
+	} else if parsedDOB != originalMp.DateBirth {
+		err := d.mpDao.UpdateMPs(id, "date_birth", mp.DateOfBirth)
+		if err != nil {
+			return nil
+		}
+	} else if mp.MartialStatus != originalMp.MartialStatus {
+		err := d.mpDao.UpdateMPs(id, "martial_status", mp.MartialStatus)
+		if err != nil {
+			return nil
+		}
+	} else if mp.County != originalMp.County {
+		err := d.mpDao.UpdateMPs(id, "county", mp.County)
+		if err != nil {
+			return nil
+		}
+	} else if mp.Constituency != originalMp.Constituency {
+		err := d.mpDao.UpdateMPs(id, "constituency", mp.Constituency)
+		if err != nil {
+			return nil
+		}
+	} else if mp.Picture != originalMp.Image {
+		err := d.mpDao.UpdateMPs(id, "image", mp.Picture)
+		if err != nil {
+			return nil
+		}
+	} else {
+		fmt.Println("******************** nothing *******************")
+	}
+	return nil
+}
+
+func (d dashboardServiceImpl) DeleteMp(id string) error {
+	err := d.mpDao.DeleteMPs(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ****************************
+// ADMIN
+// ****************************
+
+func (d dashboardServiceImpl) FetchAllAdmins() []db.Management {
+	admins := d.managerDao.ReadManagers()
+	return admins
+}
+func (d dashboardServiceImpl) RegisterAdmin(regRequest request.AddManager) error {
+	password := utils.RandStringBytes(5)
+
+	hashedPassword, err := utils.GenerateHash(password)
+	if err != nil {
+		return err
+	}
+	manager := db.Management{
+		ID:           primitive.NewObjectID(),
+		Name:         regRequest.Name,
+		NationalID:   regRequest.NationalID,
+		EmailAddress: regRequest.EmailAddress,
+		Password:     hashedPassword,
+		Role:         regRequest.Role,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+	err = d.managerDao.InsertManagers(manager)
+	if err != nil {
+		return err
+	}
+	fmt.Println(password)
+	utils.SendRandomEmail(regRequest.EmailAddress, password)
+	return nil
+}
+func (d dashboardServiceImpl) LoginAdmin(request request.AdminLoginRequest) (response.AdminLoginResponse, error) {
+	email := request.Email
+	password := request.Password
+
+	user, err := d.managerDao.FindManagerByEmail(email)
+	if err != nil {
+		return response.AdminLoginResponse{}, err
+	}
+	match, err := utils.ComparePasswordAndHash(password, user.Password)
+	if err != nil {
+		fmt.Println(err)
+		return response.AdminLoginResponse{}, err
+	}
+	if match {
+		// new token
+		token, err := utils.GenerateToken(user.EmailAddress)
+		if err != nil {
+			return response.AdminLoginResponse{}, err
+		}
+		res := response.AdminLoginResponse{
+			Token: token,
+			Admin: user,
+		}
+		return res, nil
+	} else {
+		return response.AdminLoginResponse{}, nil
+	}
+}
+func (d dashboardServiceImpl) EditAdmin(id string, admin *request.AddManager) error {
+	originalAdmin := d.managerDao.FindAdminById(id)
+
+	fmt.Printf("Got: %s\n", originalAdmin.Name)
+	if admin.Name != originalAdmin.Name {
+		err := d.managerDao.UpdateManager(id, "name", admin.Name)
+		if err != nil {
+			return err
+		}
+	} else if admin.NationalID != originalAdmin.NationalID {
+		err := d.managerDao.UpdateManager(id, "national_id", admin.NationalID)
+		if err != nil {
+			return err
+		}
+	} else if admin.Role != originalAdmin.Role {
+		err := d.managerDao.UpdateManager(id, "role", string(admin.Role))
+		if err != nil {
+			return err
+		}
+	} else {
+		fmt.Println("******************** nothing *******************")
+	}
+	return nil
+}
+
+func (d dashboardServiceImpl) FetchAdminById(id string) db.Management {
+	admin := d.managerDao.FindAdminById(id)
+	return admin
+}
+
+func (d dashboardServiceImpl) DeleteAdmin(id string) error {
+	err := d.managerDao.DeleteManager(id)
 	if err != nil {
 		return err
 	}
