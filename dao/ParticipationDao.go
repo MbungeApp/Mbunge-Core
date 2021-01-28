@@ -30,7 +30,7 @@ type NewParticipationDaoInterface struct {
 }
 
 func participationCollection(client *mongo.Client) *mongo.Collection {
-	return client.Database("mbunge").Collection("participation")
+	return client.Database("mbunge").Collection("webinar")
 }
 
 func (p NewParticipationDaoInterface) TotalParticipations() int {

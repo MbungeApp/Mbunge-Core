@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/MbungeApp/mbunge-core/models/request"
-	"github.com/MbungeApp/mbunge-core/v1/participation/service"
+	"github.com/MbungeApp/mbunge-core/v1/webinar/service"
 	"github.com/labstack/echo/v4"
 	ms "github.com/mitchellh/mapstructure"
 )
@@ -23,7 +23,7 @@ func NewParticipationRestHandler(e *echo.Echo, participationService service.Part
 	participationRestHandler := participationRestHandler{participationService: participationService}
 
 	// semantic versioning of api !!
-	g := e.Group("/api/v1/participation")
+	g := e.Group("/api/v1/webinar")
 	//g.Use(middleware.JWT([]byte("secret")))
 	g.GET("/", participationRestHandler.AllParticipation)
 	g.GET("/response/:id", participationRestHandler.AllResponseByParticipation)
@@ -41,7 +41,7 @@ func NewParticipationRestHandler(e *echo.Echo, participationService service.Part
 // @Failure 400 {string} string "err_code：10002 参数错误； err_code：10003 校验错误"
 // @Failure 401 {string} string "err_code：10001 登录失败"
 // @Failure 500 {string} string "err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常"
-// @Router /api/v1/participation/ [get]
+// @Router /api/v1/webinar/ [get]
 func (p *participationRestHandler) AllParticipation(c echo.Context) error {
 	return c.JSON(http.StatusOK, p.participationService.GetAllParticipation())
 }

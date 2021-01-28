@@ -9,7 +9,7 @@ import (
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"github.com/MbungeApp/mbunge-core/models/request"
 	"github.com/MbungeApp/mbunge-core/models/response"
-	"github.com/MbungeApp/mbunge-core/v1/participation/repository"
+	"github.com/MbungeApp/mbunge-core/v1/webinar/repository"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )

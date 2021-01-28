@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/MbungeApp/mbunge-core/v1/participation/service"
+	"github.com/MbungeApp/mbunge-core/v1/webinar/service"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +31,7 @@ func NewWebsocketHandler(e *echo.Echo, participationService service.Participatio
 	participationWSHandler := participationWSHandler{
 		participationService: participationService,
 	}
-	g := e.Group("/api/v1/participation")
+	g := e.Group("/api/v1/webinar")
 	g.GET("/ws", participationWSHandler.ChangeStreams)
 }
 
