@@ -17,9 +17,9 @@ import (
 	eventRepo "github.com/MbungeApp/mbunge-core/v1/news/repository"
 	eventService "github.com/MbungeApp/mbunge-core/v1/news/service"
 
-	participationHandler "github.com/MbungeApp/mbunge-core/v1/participation/handler"
-	participationRepo "github.com/MbungeApp/mbunge-core/v1/participation/repository"
-	participationService "github.com/MbungeApp/mbunge-core/v1/participation/service"
+	participationHandler "github.com/MbungeApp/mbunge-core/v1/webinar/handler"
+	participationRepo "github.com/MbungeApp/mbunge-core/v1/webinar/repository"
+	participationService "github.com/MbungeApp/mbunge-core/v1/webinar/service"
 
 	mpHandler "github.com/MbungeApp/mbunge-core/v1/mp/handler"
 	mpRepo "github.com/MbungeApp/mbunge-core/v1/mp/repository"
