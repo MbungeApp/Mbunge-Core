@@ -8,21 +8,26 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
-	"path/filepath"
-	"time"
-
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/getsentry/sentry-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/ini.v1"
+	"log"
+	"net/url"
+	"path/filepath"
+	"time"
 )
 
 const (
-	configPath = "/var/www/go/Mbunge-Core/config/config.ini" // "config/config.ini"
+	configPath =
+	//"/home/pato/go/src/Mbunge-Core/config/config.ini"
+	"config/config.ini"
+	//"/var/www/go/Mbunge-Core/config/config.ini" //
+
 )
 
-var dbUrl, sentryKey string
+var dbUrl, sentryKey, mqtturl, id, username, mqttpassword, mqttport string
 var err error
 
 func GetKey(section string, key string) (string, error) {
@@ -52,6 +57,27 @@ func init() {
 		panic(err)
 	}
 
+	// MQTT
+	mqtturl, err = GetKey("MQTT", "address")
+	if err != nil {
+		panic(err)
+	}
+	id, err = GetKey("MQTT", "id")
+	if err != nil {
+		panic(err)
+	}
+	username, err = GetKey("MQTT", "username")
+	if err != nil {
+		panic(err)
+	}
+	mqttpassword, err = GetKey("MQTT", "password")
+	if err != nil {
+		panic(err)
+	}
+	mqttport, err = GetKey("MQTT", "port")
+	if err != nil {
+		panic(err)
+	}
 }
 
 // ErrorReporter connection
@@ -82,12 +108,32 @@ func ConnectDB() *mongo.Client {
 		log.Fatal(err)
 	}
 	log.Println("Connected")
-	//	defer func() {
-	//		log.Println("DB disconnected from main")
-	//		err := client.Disconnect(context.Background())
-	//		if err != nil {
-	//			log.Println("db disc err ", err)
-	//		}
-	//	}()
 	return client
+}
+
+// Connect func connecting to the MQTT
+func ConnectMqtt() mqtt.Client {
+	mqttUrl := fmt.Sprintf("http://%s:%s", mqtturl, mqttport)
+	mqttURI, err := url.Parse(mqttUrl)
+	if err != nil {
+		panic(err)
+	}
+	opts := createClientOptions(id, mqttURI)
+	client := mqtt.NewClient(opts)
+	token := client.Connect()
+	for !token.WaitTimeout(10 * time.Second) {
+	}
+	if err := token.Error(); err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Printf("Token: %s\n", token)
+	return client
+}
+func createClientOptions(clientID string, uri *url.URL) *mqtt.ClientOptions {
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(fmt.Sprintf("tcp://%s", uri.Host))
+	opts.SetUsername(username)
+	opts.SetPassword(mqttpassword)
+	opts.SetClientID(clientID)
+	return opts
 }
