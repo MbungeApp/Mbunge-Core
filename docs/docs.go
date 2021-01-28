@@ -82,7 +82,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/participation/": {
+        "/api/v1/webinar/": {
             "get": {
                 "description": "get all",
                 "consumes": [
