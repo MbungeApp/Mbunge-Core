@@ -132,8 +132,8 @@ func ConnectMqtt() mqtt.Client {
 func createClientOptions(clientID string, uri *url.URL) *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s", uri.Host))
-	opts.SetUsername(username)
-	opts.SetPassword(mqttpassword)
+	//opts.SetUsername(username)
+	//opts.SetPassword(mqttpassword)
 	opts.SetClientID(clientID)
 	return opts
 }
