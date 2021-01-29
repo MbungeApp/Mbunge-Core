@@ -6,24 +6,26 @@
 package main
 
 import (
-	"net"
-
+	"fmt"
 	"github.com/MbungeApp/mbunge-core/config"
 	userHandler "github.com/MbungeApp/mbunge-core/v1/user/handler"
 	userRepo "github.com/MbungeApp/mbunge-core/v1/user/repository"
-	userService "github.com/MbungeApp/mbunge-core/v1/user/service"
+	_userService "github.com/MbungeApp/mbunge-core/v1/user/service"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"go.mongodb.org/mongo-driver/mongo"
+	"net"
 
 	eventHandler "github.com/MbungeApp/mbunge-core/v1/news/handler"
 	eventRepo "github.com/MbungeApp/mbunge-core/v1/news/repository"
-	eventService "github.com/MbungeApp/mbunge-core/v1/news/service"
+	_eventService "github.com/MbungeApp/mbunge-core/v1/news/service"
 
 	participationHandler "github.com/MbungeApp/mbunge-core/v1/webinar/handler"
 	participationRepo "github.com/MbungeApp/mbunge-core/v1/webinar/repository"
-	participationService "github.com/MbungeApp/mbunge-core/v1/webinar/service"
+	_participationService "github.com/MbungeApp/mbunge-core/v1/webinar/service"
 
 	mpHandler "github.com/MbungeApp/mbunge-core/v1/mp/handler"
 	mpRepo "github.com/MbungeApp/mbunge-core/v1/mp/repository"
-	mpService "github.com/MbungeApp/mbunge-core/v1/mp/service"
+	_mpService "github.com/MbungeApp/mbunge-core/v1/mp/service"
 
 	_dashboardHandler "github.com/MbungeApp/mbunge-core/v1/dashboard/handler"
 	_dashboardService "github.com/MbungeApp/mbunge-core/v1/dashboard/service"
@@ -35,6 +37,18 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+var (
+	e        *echo.Echo
+	mqttConn mqtt.Client
+	client   *mongo.Client
+)
+
+func init() {
+	e = echo.New()
+	mqttConn = config.ConnectMqtt()
+	client = config.ConnectDB()
+}
 
 // @title Mbunge App API
 // @version 1.0
@@ -51,10 +65,6 @@ import (
 // @host localhost:5000
 func main() {
 
-	e := echo.New()
-
-	client := config.ConnectDB()
-
 	// middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -63,24 +73,24 @@ func main() {
 
 	// User
 	userRepository := userRepo.NewUserRepository(client)
-	userservice := userService.NewUserServiceImpl(userRepository)
-	userHandler.NewUserRestHandler(e, userservice)
+	userService := _userService.NewUserServiceImpl(userRepository)
+	userHandler.NewUserRestHandler(e, userService)
 
 	// Events
 	eventRepository := eventRepo.NewEventRepository(client)
-	eventservice := eventService.NewEventService(eventRepository)
-	eventHandler.NewEventRestHandler(e, eventservice)
+	eventService := _eventService.NewEventService(eventRepository)
+	eventHandler.NewEventRestHandler(e, eventService)
 
 	// Participation
 	participationRepository := participationRepo.NewParticipationRepositoryImpl(client)
-	participationservice := participationService.NewParticipationServiceImpl(participationRepository)
-	participationHandler.NewParticipationRestHandler(e, participationservice)
-	participationHandler.NewWebsocketHandler(e, participationservice)
-
+	participationService := _participationService.NewParticipationServiceImpl(participationRepository)
+	participationHandler.NewParticipationRestHandler(e, participationService)
+	participationHandler.NewWebsocketHandler(e, participationService)
+	webinar := participationHandler.NewMqttWebinarHandler(&mqttConn, participationService)
 	// MP
 	mpRepository := mpRepo.NewMpRepository(client)
-	mpservice := mpService.NewMpService(mpRepository)
-	mpHandler.NewMpRestHandler(e, mpservice)
+	mpService := _mpService.NewMpService(mpRepository)
+	mpHandler.NewMpRestHandler(e, mpService)
 
 	// Dashboard
 	dashboardService := _dashboardService.NewDashboardServiceImpl(client)
@@ -88,6 +98,9 @@ func main() {
 
 	// Swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	// mqtt
+	go listen(mqttConn, "topics/server", webinar.SystemActions)
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -98,4 +111,13 @@ func main() {
 	}
 	e.Listener = l
 	e.Logger.Fatal(e.Start(""))
+}
+
+func listen(client mqtt.Client, topic string, handler mqtt.MessageHandler) {
+	token := client.Subscribe(topic, 0, handler)
+	if token != nil {
+		fmt.Printf("Subscribed to topic: %s\n", topic)
+	} else {
+		fmt.Printf("Failed to subscribe to topic: %s\n", topic)
+	}
 }
