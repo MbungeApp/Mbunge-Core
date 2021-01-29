@@ -7,10 +7,15 @@ fmt:
 		go fmt ./...
 
 deploy:
-		git push heroku develop:master
+		sudo git pull origin master && sudo systemctl restart api.service && sudo systemctl status api.service && sudo systemctl restart nginx.service
 
 swagger:
 		../../bin/swag init
 
 push:
 		git push origin develop
+
+linesOfCode:
+		find . -name '*.go' | xargs wc -l
+
+
