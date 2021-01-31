@@ -16,7 +16,7 @@ import (
 
 type WebinarDaoInterface interface {
 	TotalWebinars() int
-	GetAllWebinars() []db.Webinar
+	GetAllWebinars() ([]db.Webinar, error)
 	GetWebinarsByID(webinarID string) (db.Webinar, error)
 	CreateWebinars(webinar db.Webinar) error
 	UpdateWebinars(id string, key string, value string) error
@@ -42,17 +42,17 @@ func (n NewWebinarDaoInterface) TotalWebinars() int {
 	}
 	return len(webinars)
 }
-func (n NewWebinarDaoInterface) GetAllWebinars() []db.Webinar {
+func (n NewWebinarDaoInterface) GetAllWebinars() ([]db.Webinar, error) {
 	var webinars []db.Webinar
 	cursor, err := webinarCollection(n.Client).Find(context.Background(), bson.M{})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	err = cursor.All(context.Background(), &webinars)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return webinars
+	return webinars, nil
 }
 func (n NewWebinarDaoInterface) GetWebinarsByID(webinarID string) (db.Webinar, error) {
 	objectID, _ := primitive.ObjectIDFromHex(webinarID)
@@ -70,6 +70,7 @@ func (n NewWebinarDaoInterface) GetWebinarsByID(webinarID string) (db.Webinar, e
 func (n NewWebinarDaoInterface) CreateWebinars(webinar db.Webinar) error {
 	webinar.CreatedAt = time.Now()
 	webinar.UpdatedAt = time.Now()
+	webinar.Postponed = false
 	webinar.ID = primitive.NewObjectID()
 	_, err := webinarCollection(n.Client).InsertOne(context.Background(), webinar)
 
