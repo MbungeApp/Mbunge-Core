@@ -16,11 +16,11 @@ import (
 )
 
 type webinarRestHandler struct {
-	participationService service.ParticipationService
+	webinarService service.WebinarService
 }
 
-func NewParticipationRestHandler(e *echo.Echo, participationService service.ParticipationService) {
-	webinarRestHandler := webinarRestHandler{participationService: participationService}
+func NewParticipationRestHandler(e *echo.Echo, webinarSerice service.WebinarService) {
+	webinarRestHandler := webinarRestHandler{webinarService: webinarSerice}
 
 	// semantic versioning of api !!
 	g := e.Group("/api/v1/webinar")
@@ -43,11 +43,11 @@ func NewParticipationRestHandler(e *echo.Echo, participationService service.Part
 // @Failure 500 {string} string "err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常"
 // @Router /api/v1/webinar/ [get]
 func (p *webinarRestHandler) AllParticipation(c echo.Context) error {
-	return c.JSON(http.StatusOK, p.participationService.GetAllParticipation())
+	return c.JSON(http.StatusOK, p.webinarService.GetAllWebinars())
 }
 func (p *webinarRestHandler) AllResponseByParticipation(c echo.Context) error {
 	participationID := c.Param("id")
-	return c.JSON(http.StatusOK, p.participationService.GetAllResponseByParti(participationID))
+	return c.JSON(http.StatusOK, p.webinarService.GetAllResponseByParti(participationID))
 }
 func (p *webinarRestHandler) AddResponse(c echo.Context) error {
 	var responseReq request.ResponseRequest
@@ -69,7 +69,7 @@ func (p *webinarRestHandler) AddResponse(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
-	res, err := p.participationService.AddResponse(responseReq)
+	res, err := p.webinarService.AddResponse(responseReq)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
@@ -77,5 +77,5 @@ func (p *webinarRestHandler) AddResponse(c echo.Context) error {
 }
 func (p *webinarRestHandler) DeleteResponse(c echo.Context) error {
 	responseID := c.Param("response_id")
-	return c.JSON(http.StatusOK, p.participationService.DeleteResponse(responseID))
+	return c.JSON(http.StatusOK, p.webinarService.DeleteResponse(responseID))
 }
