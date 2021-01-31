@@ -21,6 +21,10 @@ func NewDashboardHandler(e *echo.Echo, dashService service.DashboardServices) {
 	}
 	g := e.Group("/api/v1/dashboard")
 	g.GET("/metrics", dashboardHandler.home)
+	// webinar
+	g.GET("/webinar/", dashboardHandler.getAllWebinars)
+	g.POST("/webinar/add", dashboardHandler.addWebinar)
+	g.DELETE("/webinar/delete/:id", dashboardHandler.deleteWebinar)
 	// Event
 	g.GET("/event/", dashboardHandler.getAllEvents)
 	g.POST("/event/add", dashboardHandler.addEvent)
@@ -56,6 +60,36 @@ func (d dashboardHandler) home(c echo.Context) error {
 }
 
 // ********************************
+// webinar
+// ********************************
+func (d dashboardHandler) getAllWebinars(c echo.Context) error {
+	webinars, err := d.dashboardService.ViewAllWebinars()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, webinars)
+}
+func (d dashboardHandler) addWebinar(c echo.Context) error {
+	webinarReq := new(request.AddWebinar)
+	if err := c.Bind(webinarReq); err != nil {
+		return c.String(http.StatusInternalServerError, "error occurred")
+	}
+	err := d.dashboardService.AddWebinar(webinarReq)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, "Added successfully")
+}
+func (d dashboardHandler) deleteWebinar(c echo.Context) error {
+	webinarId := c.Param("id")
+	err := d.dashboardService.DeleteWebinar(webinarId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, "Deleted successfully")
+}
+
+// ********************************
 // Events
 // ********************************
 func (d dashboardHandler) getAllEvents(c echo.Context) error {
@@ -84,7 +118,7 @@ func (d dashboardHandler) addEvent(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
-	return c.JSON(http.StatusFound, "Added successfully")
+	return c.JSON(http.StatusOK, "Added successfully")
 }
 func (d dashboardHandler) getOneEvent(c echo.Context) error {
 	id := c.Param("id")
@@ -125,7 +159,7 @@ func (d dashboardHandler) deleteEvent(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
 
-	return c.JSON(http.StatusFound, "deleted successfully")
+	return c.JSON(http.StatusOK, "deleted successfully")
 }
 
 // ********************************
@@ -154,7 +188,7 @@ func (d dashboardHandler) addMp(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
-	return c.JSON(http.StatusFound, "added successfully")
+	return c.JSON(http.StatusOK, "added successfully")
 }
 func (d dashboardHandler) getOneMp(c echo.Context) error {
 	return nil
@@ -191,7 +225,7 @@ func (d dashboardHandler) deleteMp(c echo.Context) error {
 		fmt.Println("Error deleting: ", err.Error())
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
-	return c.JSON(http.StatusFound, "Deleted successfully")
+	return c.JSON(http.StatusOK, "Deleted successfully")
 }
 
 // ********************************

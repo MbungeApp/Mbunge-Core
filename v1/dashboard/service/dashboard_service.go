@@ -9,6 +9,11 @@ import (
 type DashboardServices interface {
 	GetMetrics() response.Metrics
 
+	// Webinar
+	ViewAllWebinars() ([]db.Webinar, error)
+	AddWebinar(webinar *request.AddWebinar) error
+	DeleteWebinar(id string) error
+
 	// Events
 	ViewAllEvents() ([]db.EventNew, error)
 	ViewEventById(id string) db.EventNew

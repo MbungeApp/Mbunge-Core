@@ -20,6 +20,7 @@ type dashboardServiceImpl struct {
 	newsEventsDao    dao.NewsDaoInterface
 	mpDao            dao.MPDaoInterface
 	managerDao       dao.ManagementDaoInterface
+	webinarDao       dao.WebinarDaoInterface
 }
 
 // NewDashboardServiceImpl ..
@@ -40,6 +41,7 @@ func NewDashboardServiceImpl(client *mongo.Client) DashboardServices {
 		Client: client,
 	}
 	userDao := dao.NewUserDaoInterface{Client: client}
+	webinarDao := dao.NewWebinarDaoInterface{Client: client}
 
 	return &dashboardServiceImpl{
 		participationDao: partiDao,
@@ -48,6 +50,7 @@ func NewDashboardServiceImpl(client *mongo.Client) DashboardServices {
 		newsEventsDao:    newDao,
 		mpDao:            mpDao,
 		managerDao:       managerDao,
+		webinarDao:       webinarDao,
 	}
 }
 
@@ -97,6 +100,40 @@ func (d dashboardServiceImpl) GetMetrics() response.Metrics {
 func contains(s []string, searchterm string) bool {
 	i := sort.SearchStrings(s, searchterm)
 	return i < len(s) && s[i] == searchterm
+}
+
+// ****************************
+// Webinar
+// ****************************
+func (d dashboardServiceImpl) ViewAllWebinars() ([]db.Webinar, error) {
+	webinars, err := d.webinarDao.GetAllWebinars()
+	if err != nil {
+		return nil, err
+	}
+	return webinars, nil
+}
+
+func (d dashboardServiceImpl) AddWebinar(webinar *request.AddWebinar) error {
+	webinarDb := db.Webinar{
+		Agenda:      webinar.Agenda,
+		HostedBy:    webinar.HostedBy,
+		Description: webinar.Description,
+		Duration:    webinar.Duration,
+		ScheduleAt:  time.Time{},
+	}
+	err := d.webinarDao.CreateWebinars(webinarDb)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d dashboardServiceImpl) DeleteWebinar(id string) error {
+	err := d.webinarDao.DeleteWebinars(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ****************************
