@@ -15,25 +15,25 @@ import (
 	ms "github.com/mitchellh/mapstructure"
 )
 
-type participationRestHandler struct {
+type webinarRestHandler struct {
 	participationService service.ParticipationService
 }
 
 func NewParticipationRestHandler(e *echo.Echo, participationService service.ParticipationService) {
-	participationRestHandler := participationRestHandler{participationService: participationService}
+	webinarRestHandler := webinarRestHandler{participationService: participationService}
 
 	// semantic versioning of api !!
 	g := e.Group("/api/v1/webinar")
 	//g.Use(middleware.JWT([]byte("secret")))
-	g.GET("/", participationRestHandler.AllParticipation)
-	g.GET("/response/:id", participationRestHandler.AllResponseByParticipation)
-	g.POST("/response/add", participationRestHandler.AddResponse)
-	g.DELETE("/response/delete/:id", participationRestHandler.DeleteResponse)
+	g.GET("/", webinarRestHandler.AllParticipation)
+	g.GET("/response/:id", webinarRestHandler.AllResponseByParticipation)
+	g.POST("/response/add", webinarRestHandler.AddResponse)
+	g.DELETE("/response/delete/:id", webinarRestHandler.DeleteResponse)
 }
 
 // Rest handlers
 
-// @Summary All Partipations
+// @Summary All Webinar
 // @Description get all
 // @Produce json
 // @Accept json
@@ -42,14 +42,14 @@ func NewParticipationRestHandler(e *echo.Echo, participationService service.Part
 // @Failure 401 {string} string "err_code：10001 登录失败"
 // @Failure 500 {string} string "err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常"
 // @Router /api/v1/webinar/ [get]
-func (p *participationRestHandler) AllParticipation(c echo.Context) error {
+func (p *webinarRestHandler) AllParticipation(c echo.Context) error {
 	return c.JSON(http.StatusOK, p.participationService.GetAllParticipation())
 }
-func (p *participationRestHandler) AllResponseByParticipation(c echo.Context) error {
+func (p *webinarRestHandler) AllResponseByParticipation(c echo.Context) error {
 	participationID := c.Param("id")
 	return c.JSON(http.StatusOK, p.participationService.GetAllResponseByParti(participationID))
 }
-func (p *participationRestHandler) AddResponse(c echo.Context) error {
+func (p *webinarRestHandler) AddResponse(c echo.Context) error {
 	var responseReq request.ResponseRequest
 	var info echo.Map
 	var err error
@@ -75,7 +75,7 @@ func (p *participationRestHandler) AddResponse(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, res)
 }
-func (p *participationRestHandler) DeleteResponse(c echo.Context) error {
+func (p *webinarRestHandler) DeleteResponse(c echo.Context) error {
 	responseID := c.Param("response_id")
 	return c.JSON(http.StatusOK, p.participationService.DeleteResponse(responseID))
 }
