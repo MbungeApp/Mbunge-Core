@@ -5,19 +5,16 @@ import (
 	"fmt"
 	"github.com/MbungeApp/mbunge-core/models/response"
 	"github.com/MbungeApp/mbunge-core/utils"
-	"github.com/MbungeApp/mbunge-core/v1/webinar/service"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 type WebinarMqtt struct {
-	Client               *mqtt.Client
-	participationService service.ParticipationService
+	Client *mqtt.Client
 }
 
-func NewMqttWebinarHandler(mqttClient *mqtt.Client, service service.ParticipationService) WebinarMqtt {
+func NewMqttWebinarHandler(mqttClient *mqtt.Client) WebinarMqtt {
 	return WebinarMqtt{
-		Client:               mqttClient,
-		participationService: service,
+		Client: mqttClient,
 	}
 }
 
