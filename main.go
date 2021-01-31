@@ -19,9 +19,8 @@ import (
 	eventRepo "github.com/MbungeApp/mbunge-core/v1/news/repository"
 	_eventService "github.com/MbungeApp/mbunge-core/v1/news/service"
 
-	participationHandler "github.com/MbungeApp/mbunge-core/v1/webinar/handler"
-	participationRepo "github.com/MbungeApp/mbunge-core/v1/webinar/repository"
-	_participationService "github.com/MbungeApp/mbunge-core/v1/webinar/service"
+	webinarHandler "github.com/MbungeApp/mbunge-core/v1/webinar/handler"
+	_webinarService "github.com/MbungeApp/mbunge-core/v1/webinar/service"
 
 	mpHandler "github.com/MbungeApp/mbunge-core/v1/mp/handler"
 	mpRepo "github.com/MbungeApp/mbunge-core/v1/mp/repository"
@@ -81,12 +80,10 @@ func main() {
 	eventService := _eventService.NewEventService(eventRepository)
 	eventHandler.NewEventRestHandler(e, eventService)
 
-	// Participation
-	participationRepository := participationRepo.NewParticipationRepositoryImpl(client)
-	participationService := _participationService.NewParticipationServiceImpl(participationRepository)
-	participationHandler.NewParticipationRestHandler(e, participationService)
-	participationHandler.NewWebsocketHandler(e, participationService)
-	webinar := participationHandler.NewMqttWebinarHandler(&mqttConn, participationService)
+	// Webinar
+	webinarService := _webinarService.NewWebinarServiceImpl(client)
+	webinarHandler.NewParticipationRestHandler(e, webinarService)
+	webinar := webinarHandler.NewMqttWebinarHandler(&mqttConn)
 	// MP
 	mpRepository := mpRepo.NewMpRepository(client)
 	mpService := _mpService.NewMpService(mpRepository)
