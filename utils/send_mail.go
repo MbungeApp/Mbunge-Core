@@ -31,7 +31,7 @@ func init() {
 func dynamicTemplateEmail(email string, otpCode int) []byte {
 	m := mail.NewV3Mail()
 
-	address := "auth-noreply@mbunge.app"
+	address := "admin@mbungeapp.tech"
 	name := "Mbunge App"
 	e := mail.NewEmail(name, address)
 	m.SetFrom(e)
@@ -51,7 +51,7 @@ func dynamicTemplateEmail(email string, otpCode int) []byte {
 }
 
 func SendRandomEmail(email string, message string) {
-	from := mail.NewEmail("Mbunge App", "auth-noreply@mbunge.app")
+	from := mail.NewEmail("Mbunge App", "admin@mbungeapp.tech")
 	subject := "Your mbungeApp admin login credentials"
 	to := mail.NewEmail("", email)
 	plainTextContent := "Hello there and welcome\n"
