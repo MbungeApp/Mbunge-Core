@@ -4,7 +4,7 @@ import (
 	cloud "cloud.google.com/go/storage"
 	"context"
 	"fmt"
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 	"google.golang.org/api/option"
 	"io"
 	"os"
@@ -36,9 +36,9 @@ func UploadFile(filePath string) (string, error) {
 
 	wc := storage.Bucket(bucket).Object(imagePath).NewWriter(ctx)
 
-	uuid := uuid.New()
+	uniqueId := uuid.New()
 	wc.Metadata = map[string]string{
-		"firebaseStorageDownloadTokens": uuid.String(),
+		"firebaseStorageDownloadTokens": uniqueId.String(),
 	}
 	_, err = io.Copy(wc, f)
 	if err != nil {
@@ -48,10 +48,6 @@ func UploadFile(filePath string) (string, error) {
 	if err := wc.Close(); err != nil {
 		return "", err
 	}
-
-	if err != nil {
-		return "", err
-	}
-	imageUrl := fmt.Sprintf("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media&token=%s", bucket, imagePath, uuid.String())
+	imageUrl := fmt.Sprintf("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media&token=%s", bucket, imagePath, uniqueId.String())
 	return imageUrl, nil
 }
