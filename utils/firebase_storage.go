@@ -3,12 +3,13 @@ package utils
 import (
 	cloud "cloud.google.com/go/storage"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/google/uuid"
 	"google.golang.org/api/option"
 	"io"
-	"mime/multipart"
 	"os"
+	"strings"
 )
 
 var (
@@ -16,32 +17,47 @@ var (
 	bucket     = "mbungeapp.appspot.com"
 )
 
-func UploadFile(file *multipart.FileHeader) (string, error) {
-	src, err := file.Open()
+func UploadFile(fileString string) (string, error) {
+	///
+	unique := uuid.New()
+	path, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	if !strings.Contains(path, "/uploads") {
+		err = os.Chdir("./uploads")
+		if err != nil {
+			return "", err
+		}
+	}
+
+	dec, err := base64.StdEncoding.DecodeString(fileString)
+	if err != nil {
+		return "", err
+	}
+	f, err := os.Create(fmt.Sprintf("%s.png", unique.String()))
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	if _, err := f.Write(dec); err != nil {
+		return "", err
+	}
+	if err := f.Sync(); err != nil {
+		return "", err
+	}
+
+	src, err := os.Open(f.Name())
 	if err != nil {
 		return "", err
 	}
 	defer src.Close()
-	// Destination
-	err = os.Chdir("./uploads")
-	if err != nil {
-		return "", err
-	}
-	dst, err := os.Create(file.Filename)
-	if err != nil {
-		return "", err
-	}
-	defer dst.Close()
-	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
-		return "", err
-	}
 
-	imgUrl, err := firestoreStorageService(fmt.Sprintf("../uploads/%s", file.Filename), file.Filename)
+	imgUrl, err := firestoreStorageService(fmt.Sprintf("../uploads/%s", f.Name()), f.Name())
 	if err != nil {
 		return "", err
 	}
-	defer os.Remove(file.Filename)
+	defer os.Remove(f.Name())
 
 	return imgUrl, nil
 }

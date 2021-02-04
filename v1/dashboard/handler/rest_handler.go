@@ -79,7 +79,7 @@ func (d dashboardHandler) addWebinar(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, "Added successfully")
+	return c.JSON(http.StatusCreated, "Added successfully")
 }
 func (d dashboardHandler) deleteWebinar(c echo.Context) error {
 	webinarId := c.Param("id")
@@ -114,11 +114,9 @@ func (d dashboardHandler) addEvent(c echo.Context) error {
 	name := c.FormValue("name")
 	body := c.FormValue("body")
 
-	file, err := c.FormFile("picture")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	imageUrl, err := utils.UploadFile(file)
+	fileString := c.FormValue("picture")
+
+	imageUrl, err := utils.UploadFile(fileString)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -132,7 +130,7 @@ func (d dashboardHandler) addEvent(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
-	return c.JSON(http.StatusOK, "Added successfully")
+	return c.JSON(http.StatusCreated, "Added successfully")
 }
 func (d dashboardHandler) getOneEvent(c echo.Context) error {
 	id := c.Param("id")
@@ -200,11 +198,9 @@ func (d dashboardHandler) addMp(c echo.Context) error {
 	martialStatus := c.FormValue("martial_status")
 	dateOfBirth := c.FormValue("date_of_birth")
 	bio := c.FormValue("bio")
-	file, err := c.FormFile("picture")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	imageUrl, err := utils.UploadFile(file)
+	fileString := c.FormValue("picture")
+
+	imageUrl, err := utils.UploadFile(fileString)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -218,14 +214,12 @@ func (d dashboardHandler) addMp(c echo.Context) error {
 		DateOfBirth:   dateOfBirth,
 		Bio:           bio,
 	}
-	if err := c.Bind(mpReq); err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
-	}
+
 	err = d.dashboardService.AddMp(&mpReq)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
-	return c.JSON(http.StatusOK, "added successfully")
+	return c.JSON(http.StatusCreated, "added successfully")
 }
 func (d dashboardHandler) getOneMp(c echo.Context) error {
 	return nil
