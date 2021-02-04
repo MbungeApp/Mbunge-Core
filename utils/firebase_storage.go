@@ -7,23 +7,48 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/api/option"
 	"io"
+	"mime/multipart"
 	"os"
 )
 
 var (
-	accessJson = "config/credentials.json"
+	accessJson = "../config/credentials.json"
 	bucket     = "mbungeapp.appspot.com"
 )
 
-func UploadFile(filePath string) (string, error) {
-	ctx := context.Background()
-
-	clientOptions := option.WithCredentialsFile(accessJson)
-
-	storage, err := cloud.NewClient(ctx, clientOptions)
+func UploadFile(file *multipart.FileHeader) (string, error) {
+	src, err := file.Open()
 	if err != nil {
 		return "", err
 	}
+	defer src.Close()
+	// Destination
+	err = os.Chdir("./uploads")
+	if err != nil {
+		return "", err
+	}
+	dst, err := os.Create(file.Filename)
+	if err != nil {
+		return "", err
+	}
+	defer dst.Close()
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return "", err
+	}
+
+	imgUrl, err := firestoreStorageService(fmt.Sprintf("../uploads/%s", file.Filename), file.Filename)
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(file.Filename)
+
+	return imgUrl, nil
+}
+
+func firestoreStorageService(filePath string, imagePath string) (string, error) {
+	ctx := context.Background()
+
 	f, err := os.Open(filePath)
 
 	if err != nil {
@@ -32,7 +57,12 @@ func UploadFile(filePath string) (string, error) {
 
 	defer f.Close()
 
-	imagePath := f.Name()
+	clientOptions := option.WithCredentialsFile(accessJson)
+
+	storage, err := cloud.NewClient(ctx, clientOptions)
+	if err != nil {
+		return "", err
+	}
 
 	wc := storage.Bucket(bucket).Object(imagePath).NewWriter(ctx)
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/MbungeApp/mbunge-core/models/request"
+	"github.com/MbungeApp/mbunge-core/utils"
 	"github.com/MbungeApp/mbunge-core/v1/dashboard/service"
 	"github.com/labstack/echo/v4"
 	ms "github.com/mitchellh/mapstructure"
@@ -110,11 +111,24 @@ func (d dashboardHandler) getAllEvents(c echo.Context) error {
 
 }
 func (d dashboardHandler) addEvent(c echo.Context) error {
-	eventReq := new(request.EventRequest)
-	if err := c.Bind(eventReq); err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+	name := c.FormValue("name")
+	body := c.FormValue("body")
+
+	file, err := c.FormFile("picture")
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	err := d.dashboardService.AddEvent(eventReq)
+	imageUrl, err := utils.UploadFile(file)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	eventReq := request.EventRequest{
+		Name:    name,
+		Picture: imageUrl,
+		Body:    body,
+	}
+
+	err = d.dashboardService.AddEvent(&eventReq)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
@@ -180,11 +194,34 @@ func (d dashboardHandler) getAllMps(c echo.Context) error {
 
 }
 func (d dashboardHandler) addMp(c echo.Context) error {
-	mpReq := new(request.MpRequest)
+	name := c.FormValue("name")
+	constituency := c.FormValue("constituency")
+	county := c.FormValue("county")
+	martialStatus := c.FormValue("martial_status")
+	dateOfBirth := c.FormValue("date_of_birth")
+	bio := c.FormValue("bio")
+	file, err := c.FormFile("picture")
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	imageUrl, err := utils.UploadFile(file)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	mpReq := request.MpRequest{
+		Name:          name,
+		Picture:       imageUrl,
+		Constituency:  constituency,
+		County:        county,
+		MartialStatus: martialStatus,
+		DateOfBirth:   dateOfBirth,
+		Bio:           bio,
+	}
 	if err := c.Bind(mpReq); err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
-	err := d.dashboardService.AddMp(mpReq)
+	err = d.dashboardService.AddMp(&mpReq)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "error occurred")
 	}
