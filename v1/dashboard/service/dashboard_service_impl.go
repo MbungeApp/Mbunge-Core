@@ -112,7 +112,6 @@ func (d dashboardServiceImpl) ViewAllWebinars() ([]db.Webinar, error) {
 	}
 	return webinars, nil
 }
-
 func (d dashboardServiceImpl) AddWebinar(webinar *request.AddWebinar) error {
 	webinarDb := db.Webinar{
 		Agenda:      webinar.Agenda,
@@ -127,7 +126,6 @@ func (d dashboardServiceImpl) AddWebinar(webinar *request.AddWebinar) error {
 	}
 	return nil
 }
-
 func (d dashboardServiceImpl) DeleteWebinar(id string) error {
 	err := d.webinarDao.DeleteWebinars(id)
 	if err != nil {
@@ -289,7 +287,6 @@ func (d dashboardServiceImpl) DeleteMp(id string) error {
 // ****************************
 // ADMIN
 // ****************************
-
 func (d dashboardServiceImpl) FetchAllAdmins() []db.Management {
 	admins := d.managerDao.ReadManagers()
 	return admins
@@ -362,7 +359,7 @@ func (d dashboardServiceImpl) EditAdmin(id string, admin *request.AddManager) er
 			return err
 		}
 	} else if admin.Role != originalAdmin.Role {
-		err := d.managerDao.UpdateManager(id, "role", string(admin.Role))
+		err := d.managerDao.UpdateManager(id, "role", string(rune(admin.Role)))
 		if err != nil {
 			return err
 		}
@@ -372,11 +369,28 @@ func (d dashboardServiceImpl) EditAdmin(id string, admin *request.AddManager) er
 	return nil
 }
 
+func (d dashboardServiceImpl) UpdateAdminPassword(password *request.UpdatePassword) (db.Management, error) {
+	user, err := d.managerDao.FindManagerByEmail(password.EmailAddress)
+	if err != nil {
+		return db.Management{}, err
+	}
+	hashedPassword, err := utils.GenerateHash(password.NewPassword)
+	if err != nil {
+		return db.Management{}, err
+	}
+	err = d.managerDao.UpdateManager(user.ID.String(), "password", hashedPassword)
+	if err != nil {
+		return db.Management{}, err
+	}
+	originalAdmin := d.managerDao.FindAdminById(user.ID.String())
+
+	return originalAdmin, nil
+}
+
 func (d dashboardServiceImpl) FetchAdminById(id string) db.Management {
 	admin := d.managerDao.FindAdminById(id)
 	return admin
 }
-
 func (d dashboardServiceImpl) DeleteAdmin(id string) error {
 	err := d.managerDao.DeleteManager(id)
 	if err != nil {

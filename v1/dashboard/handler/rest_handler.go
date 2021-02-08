@@ -43,6 +43,7 @@ func NewDashboardHandler(e *echo.Echo, dashService service.DashboardServices) {
 	g.POST("/management/sign_in", dashboardHandler.adminSignIn)
 	g.POST("/management/add", dashboardHandler.addAdmin)
 	g.POST("/management/edit/:id", dashboardHandler.editAdmin)
+	g.POST("/management/password/:id", dashboardHandler.editAdminPassword)
 	g.DELETE("/management/delete/:id", dashboardHandler.deleteAdmin)
 }
 
@@ -222,7 +223,7 @@ func (d dashboardHandler) addMp(c echo.Context) error {
 	return c.JSON(http.StatusCreated, "added successfully")
 }
 func (d dashboardHandler) getOneMp(c echo.Context) error {
-	return nil
+	return c.JSON(http.StatusOK, "work in progress")
 }
 func (d dashboardHandler) editMp(c echo.Context) error {
 	id := c.Param("id")
@@ -331,6 +332,18 @@ func (d dashboardHandler) editAdmin(c echo.Context) error {
 	}
 	originalAdmin := d.dashboardService.FetchAdminById(id)
 	return c.JSON(http.StatusOK, originalAdmin)
+}
+func (d dashboardHandler) editAdminPassword(c echo.Context) error {
+	adminUpdatePassword := new(request.UpdatePassword)
+	if err := c.Bind(adminUpdatePassword); err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, "Invalid arguments passed")
+	}
+	manager, err := d.dashboardService.UpdateAdminPassword(adminUpdatePassword)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, manager)
 }
 func (d dashboardHandler) deleteAdmin(c echo.Context) error {
 	id := c.Param("id")

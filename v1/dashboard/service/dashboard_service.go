@@ -34,5 +34,6 @@ type DashboardServices interface {
 	RegisterAdmin(regRequest request.AddManager) error
 	LoginAdmin(request request.AdminLoginRequest) (response.AdminLoginResponse, error)
 	EditAdmin(id string, admin *request.AddManager) error
+	UpdateAdminPassword(password *request.UpdatePassword) (db.Management, error)
 	DeleteAdmin(id string) error
 }
