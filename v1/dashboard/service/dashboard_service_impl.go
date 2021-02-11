@@ -118,7 +118,7 @@ func (d dashboardServiceImpl) AddWebinar(webinar *request.AddWebinar) error {
 		HostedBy:    webinar.HostedBy,
 		Description: webinar.Description,
 		Duration:    webinar.Duration,
-		ScheduleAt:  time.Time{},
+		ScheduleAt:  webinar.ScheduleAt,
 	}
 	err := d.webinarDao.CreateWebinars(webinarDb)
 	if err != nil {
