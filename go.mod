@@ -10,7 +10,6 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.3.1
 	github.com/getsentry/sentry-go v0.7.0
 	github.com/google/uuid v1.2.0
-	github.com/gorilla/websocket v1.4.2
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/ryankurte/go-mapbox v0.4.4

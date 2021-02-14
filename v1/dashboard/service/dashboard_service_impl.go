@@ -124,12 +124,22 @@ func (d dashboardServiceImpl) AddWebinar(webinar *request.AddWebinar) error {
 	if err != nil {
 		return err
 	}
-	go utils.SendNotification("notifications", map[string]map[string]string{
-		"notification": {
-			"body":  webinar.Description,
-			"title": fmt.Sprintf("New webinar: %s", webinar.Agenda),
-		},
-	})
+	//go utils.SendNotification("notifications", map[string]map[string]string{
+	//	"notification": {
+	//		"body":  webinar.Description,
+	//		"title": fmt.Sprintf("New webinar: %s", webinar.Agenda),
+	//	},
+	//})
+	notif := request.Notification{
+		Body:  webinar.Description,
+		Title: fmt.Sprintf("New webinar: %s", webinar.Agenda),
+	}
+	bytes, _ := notif.Marshal()
+	go utils.SendNotification("/topics/notifications",
+		map[string]string{
+			"notification": string(bytes),
+		})
+
 	return nil
 }
 func (d dashboardServiceImpl) DeleteWebinar(id string) error {

@@ -5,15 +5,18 @@ import (
 	"github.com/NaySoftware/go-fcm"
 )
 
-const serverKey = "AAAAUZOkvLk:APA91bGnP9C_YFnXS-D2gzIYl6HC3uRsIMo4zoHJYiAIQPIUTGbD8G_fho4oZT2KM4TOiIRY3nG0fY4YUj9MJQV_k9mIK7JmJaDXBeI7Dcfon0UqGMfi8CQp790ryMT600X3SV-xH3QQ"
+const serverKey = "AAAAUZOkvLk:APA91bHBg_eOYcxTuuoW7LvyezgkcdT1VSgk1pvBKV6SqID36k_iMPkOfuaotTvLhOEBPmkjREDmarDX9PaGd3kkyCET-ieteGaTOlvhofG0oPZeXB0TNlPAV-HvbCAQxhDDT3XX8vRH"
 
-func SendNotification(topic string, data interface{}) error {
+func SendNotification(topic string, data map[string]string) error {
 	c := fcm.NewFcmClient(serverKey)
+	fmt.Println(data)
 	c.NewFcmMsgTo(topic, data)
+
 	status, err := c.Send()
-	if err != nil {
-		return err
+	if err == nil {
+		status.PrintResults()
+	} else {
+		fmt.Println(err)
 	}
-	fmt.Println(status.StatusCode)
 	return nil
 }
