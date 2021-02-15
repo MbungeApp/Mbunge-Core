@@ -21,6 +21,7 @@ type WebinarDaoInterface interface {
 	CreateWebinars(webinar db.Webinar) error
 	UpdateWebinars(id string, key string, value string) error
 	DeleteWebinars(webinarId string) error
+	WebinarsChanges() (*mongo.ChangeStream, error)
 }
 
 type NewWebinarDaoInterface struct {
@@ -103,4 +104,13 @@ func (n NewWebinarDaoInterface) DeleteWebinars(webinarId string) error {
 		return err
 	}
 	return nil
+}
+
+func (n NewWebinarDaoInterface) WebinarsChanges() (*mongo.ChangeStream, error) {
+
+	changeStream, err := webinarCollection(n.Client).Watch(context.Background(), mongo.Pipeline{})
+	if err != nil {
+		return nil, err
+	}
+	return changeStream, nil
 }

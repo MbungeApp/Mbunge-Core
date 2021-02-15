@@ -93,3 +93,7 @@ func (w webinarServiceImpl) DeleteResponse(responseId string) error {
 	}
 	return nil
 }
+
+func (w webinarServiceImpl) ChangeStreams() (*mongo.ChangeStream, error) {
+	return w.responseDao.QuestionChanges()
+}

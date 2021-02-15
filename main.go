@@ -83,6 +83,7 @@ func main() {
 	// Webinar
 	webinarService := _webinarService.NewWebinarServiceImpl(client)
 	webinarHandler.NewParticipationRestHandler(e, webinarService)
+	webinarHandler.NewWebsocketHandler(e, webinarService)
 	webinar := webinarHandler.NewMqttWebinarHandler(&mqttConn)
 	// MP
 	mpRepository := mpRepo.NewMpRepository(client)

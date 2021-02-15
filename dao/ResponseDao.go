@@ -19,6 +19,7 @@ type ResponseDaoInterface interface {
 	GetAllResponseByParti(participationID string) []db.Response
 	GetResponseById(responseId string) (db.Response, error)
 	DeleteResponse(responseId string) error
+	QuestionChanges() (*mongo.ChangeStream, error)
 	//MostResponse()
 }
 
@@ -95,4 +96,13 @@ func (r NewResponseDaoInterface) DeleteResponse(responseId string) error {
 		return err
 	}
 	return nil
+}
+
+func (r NewResponseDaoInterface) QuestionChanges() (*mongo.ChangeStream, error) {
+
+	changeStream, err := responseCollection(r.Client).Watch(context.Background(), mongo.Pipeline{})
+	if err != nil {
+		return nil, err
+	}
+	return changeStream, nil
 }
