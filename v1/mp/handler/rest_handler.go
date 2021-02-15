@@ -10,7 +10,6 @@ import (
 
 	"github.com/MbungeApp/mbunge-core/v1/mp/service"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 type mpRestHandler struct {
@@ -20,7 +19,7 @@ type mpRestHandler struct {
 func NewMpRestHandler(e *echo.Echo, mpService service.MpService) {
 	mpRestHandler := &mpRestHandler{mpService: mpService}
 	g := e.Group("/api/v1/mp")
-	g.Use(middleware.JWT([]byte("secret")))
+	//g.Use(middleware.JWT([]byte("secret")))
 	g.GET("/", mpRestHandler.mpOftheWeek)
 	g.GET("/all", mpRestHandler.allMps)
 }

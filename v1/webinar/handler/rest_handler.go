@@ -6,6 +6,7 @@
 package handler
 
 import (
+	"github.com/MbungeApp/mbunge-core/utils"
 	"log"
 	"net/http"
 
@@ -19,13 +20,14 @@ type webinarRestHandler struct {
 	webinarService service.WebinarService
 }
 
-func NewParticipationRestHandler(e *echo.Echo, webinarSerice service.WebinarService) {
-	webinarRestHandler := webinarRestHandler{webinarService: webinarSerice}
+func NewParticipationRestHandler(e *echo.Echo, webinarService service.WebinarService) {
+	webinarRestHandler := webinarRestHandler{webinarService: webinarService}
 
 	// semantic versioning of api !!
 	g := e.Group("/api/v1/webinar")
 	//g.Use(middleware.JWT([]byte("secret")))
 	g.GET("/", webinarRestHandler.AllParticipation)
+	g.GET("/status/:id", webinarRestHandler.WebinarStatus)
 	g.GET("/response/:id", webinarRestHandler.AllResponseByParticipation)
 	g.POST("/response/add", webinarRestHandler.AddResponse)
 	g.DELETE("/response/delete/:id", webinarRestHandler.DeleteResponse)
@@ -42,6 +44,14 @@ func NewParticipationRestHandler(e *echo.Echo, webinarSerice service.WebinarServ
 // @Failure 401 {string} string "err_code：10001 登录失败"
 // @Failure 500 {string} string "err_code：20001 服务错误；err_code：20002 接口错误；err_code：20003 无数据错误；err_code：20004 数据库异常；err_code：20005 缓存异常"
 // @Router /api/v1/webinar/ [get]
+func (p *webinarRestHandler) WebinarStatus(c echo.Context) error {
+	id := c.Param("id")
+	channelInfo, err := utils.IsChannelAvailable(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, channelInfo)
+}
 func (p *webinarRestHandler) AllParticipation(c echo.Context) error {
 	return c.JSON(http.StatusOK, p.webinarService.GetAllWebinars())
 }
