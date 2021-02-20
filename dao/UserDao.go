@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"strconv"
 	"time"
 )
 
@@ -21,11 +22,12 @@ type UserDaoInterface interface {
 	TotalUsers() int
 	UsersLocation() []string
 	AddUser(user db.User) (db.User, error)
-	UpdateUser(id string, key string, value string) (db.User, error)
+	UpdateUser(id string, key string, value string) error
 	GetUserByPhone(phone string) (db.User, error)
 	GetUserById(userId string) (db.User, error)
 	DoesUserExist(phone string) bool
 	VerifyUser(userid string) error
+	DeleteUser(userid string) error
 }
 
 type NewUserDaoInterface struct {
@@ -47,9 +49,9 @@ func (s NewUserDaoInterface) GetGenderTotals() (int, int) {
 	}
 	for i := 0; i < len(users); i++ {
 		if users[i].Gender == 0 {
-			male = +1
+			male = male + 1
 		} else {
-			female = +1
+			female = female + 1
 		}
 	}
 	return male, female
@@ -104,10 +106,21 @@ func (s NewUserDaoInterface) AddUser(user db.User) (db.User, error) {
 		return findUserById(res.InsertedID.(primitive.ObjectID), s.Client), nil
 	}
 }
-func (s NewUserDaoInterface) UpdateUser(id string, key string, value string) (db.User, error) {
+func (s NewUserDaoInterface) UpdateUser(id string, key string, value string) error {
+	var update bson.D
+
 	objID, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.D{{"_id", objID}}
-	update := bson.D{{Key: "$set", Value: bson.M{key: value, "updated_at": time.Now()}}}
+	if key == "date_birth" {
+		layout := "2006-01-02T15:04:05Z"
+		parsedDOB, _ := time.Parse(layout, value)
+		update = bson.D{{Key: "$set", Value: bson.M{key: parsedDOB, "updated_at": time.Now()}}}
+	} else if key == "gender" {
+		i, _ := strconv.Atoi(value)
+		update = bson.D{{Key: "$set", Value: bson.M{key: i, "updated_at": time.Now()}}}
+	} else {
+		update = bson.D{{Key: "$set", Value: bson.M{key: value, "updated_at": time.Now()}}}
+	}
 	//update := bson.D{{Key: "$set", Value: bson.M{key: value, "updated_at": primitive.Timestamp{T: uint32(time.Now().Unix())}}}}
 	MbungeDb := *s.Client.Database("mbunge").Collection("user")
 
@@ -117,10 +130,10 @@ func (s NewUserDaoInterface) UpdateUser(id string, key string, value string) (db
 		update,
 	)
 	if err != nil {
-		return db.User{}, err
+		return err
 	}
 
-	return findUserById(objID, s.Client), nil
+	return nil
 }
 func (s NewUserDaoInterface) GetUserByPhone(phone string) (db.User, error) {
 	var user db.User
@@ -177,6 +190,17 @@ func (s NewUserDaoInterface) VerifyUser(userid string) error {
 		filter,
 		update,
 	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s NewUserDaoInterface) DeleteUser(userid string) error {
+	objID, _ := primitive.ObjectIDFromHex(userid)
+	MbungeDb := *s.Client.Database("mbunge").Collection("user")
+	_, err := MbungeDb.DeleteOne(context.Background(), bson.M{
+		"_id": objID,
+	})
 	if err != nil {
 		return err
 	}
