@@ -10,6 +10,7 @@ import (
 	ms "github.com/mitchellh/mapstructure"
 	"log"
 	"net/http"
+	"time"
 )
 
 type dashboardHandler struct {
@@ -25,6 +26,7 @@ func NewDashboardHandler(e *echo.Echo, dashService service.DashboardServices) {
 	// webinar
 	g.GET("/webinar/", dashboardHandler.getAllWebinars)
 	g.POST("/webinar/add", dashboardHandler.addWebinar)
+	g.POST("/webinar/edit/:id", dashboardHandler.editWebinar)
 	g.DELETE("/webinar/delete/:id", dashboardHandler.deleteWebinar)
 	// Event
 	g.GET("/event/", dashboardHandler.getAllEvents)
@@ -74,7 +76,7 @@ func (d dashboardHandler) getAllWebinars(c echo.Context) error {
 func (d dashboardHandler) addWebinar(c echo.Context) error {
 	webinarReq := new(request.AddWebinar)
 	if err := c.Bind(webinarReq); err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err := d.dashboardService.AddWebinar(webinarReq)
 	if err != nil {
@@ -90,6 +92,30 @@ func (d dashboardHandler) deleteWebinar(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, "Deleted successfully")
 }
+func (d dashboardHandler) editWebinar(c echo.Context) error {
+	id := c.Param("id")
+	var mpMap interface{}
+	mpReq := new(request.EditWebinar)
+	if err := c.Bind(mpReq); err != nil {
+		return c.String(http.StatusInternalServerError, "error occurred")
+	}
+	err := d.dashboardService.EditWebinar(id, mpReq)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "error occurred")
+	}
+	mp := d.dashboardService.ViewWebinarById(id)
+
+	marshalMp, err := json.Marshal(mp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "error occurred")
+	}
+	err = json.Unmarshal(marshalMp, &mpMap)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "error occurred")
+	}
+
+	return c.JSON(http.StatusOK, mpMap)
+}
 
 // ********************************
 // Events
@@ -98,15 +124,15 @@ func (d dashboardHandler) getAllEvents(c echo.Context) error {
 	var eventMap []interface{}
 	eventsDb, err := d.dashboardService.ViewAllEvents()
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	marshalEvents, err := json.Marshal(eventsDb)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err = json.Unmarshal(marshalEvents, &eventMap)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	return c.JSON(http.StatusOK, eventMap)
 
@@ -129,7 +155,7 @@ func (d dashboardHandler) addEvent(c echo.Context) error {
 
 	err = d.dashboardService.AddEvent(&eventReq)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	return c.JSON(http.StatusCreated, "Added successfully")
 }
@@ -144,21 +170,21 @@ func (d dashboardHandler) editEvent(c echo.Context) error {
 	var eventMap interface{}
 	eventReq := new(request.EventRequest)
 	if err := c.Bind(eventReq); err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err := d.dashboardService.EditEvent(id, eventReq)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	even := d.dashboardService.ViewEventById(id)
 
 	marshalParticipations, err := json.Marshal(even)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err = json.Unmarshal(marshalParticipations, &eventMap)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 
 	return c.JSON(http.StatusOK, eventMap)
@@ -169,7 +195,7 @@ func (d dashboardHandler) deleteEvent(c echo.Context) error {
 	err := d.dashboardService.DeleteEvent(id)
 	if err != nil {
 		fmt.Println("Error deleting: ", err.Error())
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 
 	return c.JSON(http.StatusOK, "deleted successfully")
@@ -182,11 +208,11 @@ func (d dashboardHandler) getAllMps(c echo.Context) error {
 	var mpInterface []interface{}
 	mpsDb, err := d.dashboardService.ViewAllMps()
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	marshalMps, err := json.Marshal(mpsDb)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err = json.Unmarshal(marshalMps, &mpInterface)
 	return c.JSON(http.StatusOK, mpInterface)
@@ -206,19 +232,22 @@ func (d dashboardHandler) addMp(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
+	layout := "2006-01-02T15:04:05Z"
+	t, err := time.Parse(layout, dateOfBirth)
+
 	mpReq := request.MpRequest{
 		Name:          name,
 		Picture:       imageUrl,
 		Constituency:  constituency,
 		County:        county,
 		MartialStatus: martialStatus,
-		DateOfBirth:   dateOfBirth,
+		DateOfBirth:   t,
 		Bio:           bio,
 	}
 
 	err = d.dashboardService.AddMp(&mpReq)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	return c.JSON(http.StatusCreated, "added successfully")
 }
@@ -230,17 +259,17 @@ func (d dashboardHandler) editMp(c echo.Context) error {
 	var mpMap interface{}
 	mpReq := new(request.MpRequest)
 	if err := c.Bind(mpReq); err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err := d.dashboardService.EditMp(id, mpReq)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	mp := d.dashboardService.ViewMpById(id)
 
 	marshalMp, err := json.Marshal(mp)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err = json.Unmarshal(marshalMp, &mpMap)
 	if err != nil {
@@ -255,7 +284,7 @@ func (d dashboardHandler) deleteMp(c echo.Context) error {
 	err := d.dashboardService.DeleteMp(id)
 	if err != nil {
 		fmt.Println("Error deleting: ", err.Error())
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	return c.JSON(http.StatusOK, "Deleted successfully")
 }
@@ -324,7 +353,7 @@ func (d dashboardHandler) editAdmin(c echo.Context) error {
 	adminReq := new(request.AddManager)
 	if err := c.Bind(adminReq); err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, "error occurred")
+		return c.JSON(http.StatusInternalServerError, "error occurred")
 	}
 	err := d.dashboardService.EditAdmin(id, adminReq)
 	if err != nil {
@@ -337,7 +366,7 @@ func (d dashboardHandler) editAdminPassword(c echo.Context) error {
 	adminUpdatePassword := new(request.UpdatePassword)
 	if err := c.Bind(adminUpdatePassword); err != nil {
 		fmt.Println(err)
-		return c.String(http.StatusInternalServerError, "Invalid arguments passed")
+		return c.JSON(http.StatusInternalServerError, "Invalid arguments passed")
 	}
 	manager, err := d.dashboardService.UpdateAdminPassword(adminUpdatePassword)
 	if err != nil {
