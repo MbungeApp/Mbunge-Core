@@ -14,7 +14,8 @@ type UserRepository interface {
 	UpdateDevice(id string, key string, value string) (db.Device, error)
 	GetDevice(userId string) (db.Device, error)
 	AddUser(user db.User) (db.User, error)
-	GetOneUser(phone string) (db.User, error)
-	UpdateUser(id string, key string, value string) (db.Device, error)
+	GetOneUser(id string) (db.User, error)
+	UpdateUser(id string, key string, value string) error
 	UpdateUserVerification(phone string) error
+	DeleteUser(phone string) error
 }

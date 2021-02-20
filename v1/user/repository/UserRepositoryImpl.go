@@ -65,18 +65,30 @@ func (u userRepository) AddUser(user db.User) (db.User, error) {
 	return user, nil
 }
 
-func (u userRepository) GetOneUser(phone string) (db.User, error) {
-	user, err := u.userDao.GetUserByPhone(phone)
+func (u userRepository) GetOneUser(id string) (db.User, error) {
+	user, err := u.userDao.GetUserById(id)
 	if err != nil {
 		return db.User{}, err
 	}
 	return user, nil
 }
 
+func (u userRepository) DeleteUser(phone string) error {
+	err := u.userDao.DeleteUser(phone)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u userRepository) UpdateUserVerification(phone string) error {
 	panic("implement me")
 }
 
-func (u userRepository) UpdateUser(id string, key string, value string) (db.Device, error) {
-	panic("implement me")
+func (u userRepository) UpdateUser(id string, key string, value string) error {
+	err := u.userDao.UpdateUser(id, key, value)
+	if err != nil {
+		return err
+	}
+	return nil
 }
