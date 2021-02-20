@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"strconv"
 	"time"
 )
 
@@ -81,9 +82,22 @@ func (n NewWebinarDaoInterface) CreateWebinars(webinar db.Webinar) error {
 	return nil
 }
 func (n NewWebinarDaoInterface) UpdateWebinars(id string, key string, value string) error {
+	var update bson.D
 	objID, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.D{{"_id", objID}}
-	update := bson.D{{Key: "$set", Value: bson.M{key: value, "updated_at": time.Now()}}}
+	if key == "schedule_at" {
+		layout := "2006-01-02T15:04:05Z"
+		parsedDOB, _ := time.Parse(layout, value)
+		update = bson.D{{Key: "$set", Value: bson.M{key: parsedDOB, "updated_at": time.Now()}}}
+	} else if key == "postponed" {
+		result, _ := strconv.ParseBool(value)
+		update = bson.D{{Key: "$set", Value: bson.M{key: result, "updated_at": time.Now()}}}
+	} else if key == "duration" {
+		i, _ := strconv.Atoi(value)
+		update = bson.D{{Key: "$set", Value: bson.M{key: i, "updated_at": time.Now()}}}
+	} else {
+		update = bson.D{{Key: "$set", Value: bson.M{key: value, "updated_at": time.Now()}}}
+	}
 
 	_, err := webinarCollection(n.Client).UpdateOne(
 		context.Background(),
