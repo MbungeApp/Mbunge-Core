@@ -14,7 +14,8 @@ func LocationToGeoCode(location string) (lat float64, long float64) {
 		fmt.Println("Error mapbox: " + err.Error())
 	}
 
-	forward, err := mapBox.Geocode.Forward(location, &forwardOpts)
+	loc := location + " Kenya"
+	forward, err := mapBox.Geocode.Forward(loc, &forwardOpts)
 	if err != nil {
 		return 0, 0
 	}
