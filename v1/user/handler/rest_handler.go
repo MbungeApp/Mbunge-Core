@@ -6,6 +6,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -25,6 +27,8 @@ func NewUserRestHandler(e *echo.Echo, userService service.UserService) {
 	g := e.Group("/api/v1/auth")
 	g.POST("/sign_in", userRestHandler.SignInUser)
 	g.POST("/sign_up", userRestHandler.SignUpUser)
+	g.POST("/update/:id", userRestHandler.editUser)
+	g.GET("/delete/:id", userRestHandler.deleteUser)
 	g.Use(middleware.JWT([]byte("secret")))
 }
 
@@ -66,26 +70,10 @@ func (u *userRestHandler) SignInUser(c echo.Context) error {
 }
 
 func (u *userRestHandler) SignUpUser(c echo.Context) error {
-	var registerReq request.RegisterRequest
-	var info echo.Map
 	var err error
-
-	//1. bind the request payload to a struct
-	err = c.Bind(&info)
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusConflict, err)
-	}
-	decodeConfig := ms.DecoderConfig{TagName: "json", Result: &registerReq}
-	decoder, err := ms.NewDecoder(&decodeConfig)
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusBadRequest, err)
-	}
-	err = decoder.Decode(&info)
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusBadRequest, err)
+	registerReq := new(request.RegisterRequest)
+	if err := c.Bind(registerReq); err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	// 2 . send the data to service layer
@@ -94,4 +82,39 @@ func (u *userRestHandler) SignUpUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 	return c.JSON(http.StatusCreated, res)
+}
+
+func (u *userRestHandler) deleteUser(c echo.Context) error {
+	id := c.Param("id")
+	err := u.userService.DeleteUser(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, "Deleted successfully")
+}
+func (u *userRestHandler) editUser(c echo.Context) error {
+	id := c.Param("id")
+	var userMap interface{}
+	userReq := new(request.EditUser)
+	if err := c.Bind(userReq); err != nil {
+		return c.String(http.StatusInternalServerError, "error occurred")
+	}
+	fmt.Println(userReq)
+
+	err := u.userService.EditUser(id, userReq)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "error occurred")
+	}
+	user := u.userService.ViewUserById(id)
+
+	marshalUser, err := json.Marshal(user)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "error occurred")
+	}
+	err = json.Unmarshal(marshalUser, &userMap)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "error occurred")
+	}
+
+	return c.JSON(http.StatusOK, userMap)
 }
