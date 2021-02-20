@@ -6,12 +6,15 @@
 package service
 
 import (
+	"fmt"
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"github.com/MbungeApp/mbunge-core/models/request"
 	"github.com/MbungeApp/mbunge-core/models/response"
 	"github.com/MbungeApp/mbunge-core/utils"
 	"github.com/MbungeApp/mbunge-core/v1/user/repository"
 	"log"
+	"strconv"
+	"time"
 )
 
 type userServiceImpl struct {
@@ -24,7 +27,7 @@ func NewUserServiceImpl(repository repository.UserRepository) UserService {
 	}
 }
 
-func (u userServiceImpl) RegisterUser(regRequest request.RegisterRequest) (response.RegisterResponse, error) {
+func (u userServiceImpl) RegisterUser(regRequest *request.RegisterRequest) (response.RegisterResponse, error) {
 	var device db.Device
 	user := regRequest.User
 
@@ -75,6 +78,70 @@ func (u userServiceImpl) LoginUser(request request.LoginRequest) (response.Login
 	} else {
 		return response.LoginResponse{}, nil
 	}
+}
+
+func (u userServiceImpl) DeleteUser(id string) error {
+	err := u.userRepository.DeleteUser(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u userServiceImpl) EditUser(id string, user *request.EditUser) error {
+	originalUser, _ := u.userRepository.GetOneUser(id)
+	fmt.Println(originalUser)
+
+	if user.PhoneNumber != originalUser.PhoneNumber {
+		err := u.userRepository.UpdateUser(id, "phone_number", user.PhoneNumber)
+		if err != nil {
+			return err
+		}
+	} else if user.EmailAddress != originalUser.EmailAddress {
+		err := u.userRepository.UpdateUser(id, "email_address", user.EmailAddress)
+		if err != nil {
+			return err
+		}
+	} else if user.FirstName != originalUser.
+		FirstName {
+		err := u.userRepository.UpdateUser(id, "first_name", user.FirstName)
+		if err != nil {
+			return err
+		}
+	} else if user.LastName != originalUser.LastName {
+		err := u.userRepository.UpdateUser(id, "last_name", user.LastName)
+		if err != nil {
+			return err
+		}
+	} else if user.County != originalUser.County {
+		err := u.userRepository.UpdateUser(id, "county", user.County)
+		if err != nil {
+			return err
+		}
+	} else if user.DateBirth != originalUser.DateBirth {
+		err := u.userRepository.UpdateUser(id, "date_birth", user.DateBirth.Format(time.RFC3339))
+		if err != nil {
+			return err
+		}
+	} else if user.Gender != originalUser.Gender {
+		s := strconv.Itoa(user.Gender)
+		err := u.userRepository.UpdateUser(id, "gender", s)
+		if err != nil {
+			return err
+		}
+	} else {
+		fmt.Println("******************nothing*******")
+	}
+
+	return nil
+}
+
+func (u userServiceImpl) ViewUserById(id string) db.User {
+	user, err := u.userRepository.GetOneUser(id)
+	if err != nil {
+		return db.User{}
+	}
+	return user
 }
 
 func (u userServiceImpl) VerifyAccount(phone string) error {
