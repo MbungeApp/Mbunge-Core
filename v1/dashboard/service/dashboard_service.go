@@ -11,7 +11,9 @@ type DashboardServices interface {
 
 	// Webinar
 	ViewAllWebinars() ([]db.Webinar, error)
+	ViewWebinarById(id string) db.Webinar
 	AddWebinar(webinar *request.AddWebinar) error
+	EditWebinar(id string, webinar *request.EditWebinar) error
 	DeleteWebinar(id string) error
 
 	// Events

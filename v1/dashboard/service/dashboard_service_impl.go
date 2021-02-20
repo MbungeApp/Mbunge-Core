@@ -9,7 +9,7 @@ import (
 	"github.com/MbungeApp/mbunge-core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"sort"
+	"strconv"
 	"time"
 )
 
@@ -97,10 +97,15 @@ func (d dashboardServiceImpl) GetMetrics() response.Metrics {
 	}
 	return metrics
 }
-func contains(s []string, searchterm string) bool {
-	i := sort.SearchStrings(s, searchterm)
-	return i < len(s) && s[i] == searchterm
-}
+
+//func contains(s []response.UserLocation, searchterm string) bool {
+//	for index, ele := range s {
+//		if(ele.Name)
+//		fmt.Println("The", animal, "went", noise)
+//	}
+//	i := sort.SearchStrings(s, searchterm)
+//	return i < len(s) && s[i] == searchterm
+//}
 
 // ****************************
 // Webinar
@@ -142,6 +147,56 @@ func (d dashboardServiceImpl) AddWebinar(webinar *request.AddWebinar) error {
 
 	return nil
 }
+
+func (d dashboardServiceImpl) ViewWebinarById(id string) db.Webinar {
+	webinar, err := d.webinarDao.GetWebinarsByID(id)
+	if err != nil {
+		return db.Webinar{}
+	}
+	return webinar
+}
+
+func (d dashboardServiceImpl) EditWebinar(id string, webinar *request.EditWebinar) error {
+	originalWebinar, _ := d.webinarDao.GetWebinarsByID(id)
+
+	if webinar.Agenda != originalWebinar.Agenda {
+		err := d.webinarDao.UpdateWebinars(id, "agenda", webinar.Agenda)
+		if err != nil {
+			return err
+		}
+	} else if webinar.Description != originalWebinar.Description {
+		err := d.webinarDao.UpdateWebinars(id, "description", webinar.Description)
+		if err != nil {
+			return err
+		}
+	} else if webinar.ScheduleAt != originalWebinar.ScheduleAt {
+		err := d.webinarDao.UpdateWebinars(id, "schedule_at", webinar.ScheduleAt.Format(time.RFC3339))
+		if err != nil {
+			return err
+		}
+	} else if webinar.Duration != originalWebinar.Duration {
+		s := strconv.Itoa(webinar.Duration)
+		err := d.webinarDao.UpdateWebinars(id, "duration", s)
+		if err != nil {
+			return err
+		}
+	} else if webinar.HostedBy != originalWebinar.HostedBy {
+		err := d.webinarDao.UpdateWebinars(id, "hosted_by", webinar.HostedBy)
+		if err != nil {
+			return err
+		}
+	} else if webinar.Postponed != originalWebinar.Postponed {
+		str := strconv.FormatBool(webinar.Postponed)
+		err := d.webinarDao.UpdateWebinars(id, "postponed", str)
+		if err != nil {
+			return err
+		}
+	} else {
+		fmt.Println("******************** nothing *******************")
+	}
+	return nil
+}
+
 func (d dashboardServiceImpl) DeleteWebinar(id string) error {
 	err := d.webinarDao.DeleteWebinars(id)
 	if err != nil {
@@ -225,8 +280,6 @@ func (d dashboardServiceImpl) ViewMpById(id string) db.MP {
 }
 
 func (d dashboardServiceImpl) AddMp(mp *request.MpRequest) error {
-	layout := "2006-01-02"
-	parsedDOB, err := time.Parse(layout, mp.DateOfBirth)
 
 	mpDb := db.MP{
 		Name:          mp.Name,
@@ -234,12 +287,12 @@ func (d dashboardServiceImpl) AddMp(mp *request.MpRequest) error {
 		Constituency:  mp.Constituency,
 		County:        mp.County,
 		MartialStatus: mp.MartialStatus,
-		DateBirth:     parsedDOB,
+		DateBirth:     mp.DateOfBirth,
 		Bio:           mp.Bio,
 		Images:        nil,
 	}
 
-	err = d.mpDao.CreateMP(mpDb)
+	err := d.mpDao.CreateMP(mpDb)
 	if err != nil {
 		return err
 	}
@@ -247,9 +300,11 @@ func (d dashboardServiceImpl) AddMp(mp *request.MpRequest) error {
 }
 
 func (d dashboardServiceImpl) EditMp(id string, mp *request.MpRequest) error {
-	layout := "2006-01-02"
-	parsedDOB, _ := time.Parse(layout, mp.DateOfBirth)
+	//layout := "2006-01-02"
+	//parsedDOB, _ := time.Parse(layout, mp.DateOfBirth)
 	originalMp := d.mpDao.ReadOneMp(id)
+
+	fmt.Println(mp)
 
 	if mp.Name != originalMp.Name {
 		err := d.mpDao.UpdateMPs(id, "name", mp.Name)
@@ -261,8 +316,8 @@ func (d dashboardServiceImpl) EditMp(id string, mp *request.MpRequest) error {
 		if err != nil {
 			return nil
 		}
-	} else if parsedDOB != originalMp.DateBirth {
-		err := d.mpDao.UpdateMPs(id, "date_birth", mp.DateOfBirth)
+	} else if mp.DateOfBirth != originalMp.DateBirth {
+		err := d.mpDao.UpdateMPs(id, "date_birth", mp.DateOfBirth.Format(time.RFC3339))
 		if err != nil {
 			return nil
 		}
@@ -282,7 +337,7 @@ func (d dashboardServiceImpl) EditMp(id string, mp *request.MpRequest) error {
 			return nil
 		}
 	} else if mp.Picture != originalMp.Image {
-		err := d.mpDao.UpdateMPs(id, "image", mp.Picture)
+		err := d.mpDao.UpdateMPs(id, "picture", mp.Picture)
 		if err != nil {
 			return nil
 		}
