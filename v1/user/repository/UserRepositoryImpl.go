@@ -73,6 +73,14 @@ func (u userRepository) GetOneUser(id string) (db.User, error) {
 	return user, nil
 }
 
+func (u userRepository) GetOneUserByPhone(phone string) (db.User, error) {
+	user, err := u.userDao.GetUserByPhone(phone)
+	if err != nil {
+		return db.User{}, err
+	}
+	return user, nil
+}
+
 func (u userRepository) DeleteUser(phone string) error {
 	err := u.userDao.DeleteUser(phone)
 	if err != nil {

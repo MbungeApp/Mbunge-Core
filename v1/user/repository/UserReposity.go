@@ -15,6 +15,7 @@ type UserRepository interface {
 	GetDevice(userId string) (db.Device, error)
 	AddUser(user db.User) (db.User, error)
 	GetOneUser(id string) (db.User, error)
+	GetOneUserByPhone(phone string) (db.User, error)
 	UpdateUser(id string, key string, value string) error
 	UpdateUserVerification(phone string) error
 	DeleteUser(phone string) error

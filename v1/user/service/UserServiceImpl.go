@@ -56,7 +56,7 @@ func (u userServiceImpl) LoginUser(request request.LoginRequest) (response.Login
 	phone := request.Phone
 	password := request.Password
 
-	user, err := u.userRepository.GetOneUser(phone)
+	user, err := u.userRepository.GetOneUserByPhone(phone)
 	if err != nil {
 		return response.LoginResponse{}, err
 	}
