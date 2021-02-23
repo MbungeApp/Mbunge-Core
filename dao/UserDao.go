@@ -112,8 +112,8 @@ func (s NewUserDaoInterface) UpdateUser(id string, key string, value string) err
 	objID, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.D{{"_id", objID}}
 	if key == "date_birth" {
-		layout := "2006-01-02T15:04:05Z"
-		parsedDOB, _ := time.Parse(layout, value)
+		//layout := "2006-01-02T15:04:05Z"
+		parsedDOB, _ := time.Parse(time.RFC3339, value)
 		update = bson.D{{Key: "$set", Value: bson.M{key: parsedDOB, "updated_at": time.Now()}}}
 	} else if key == "gender" {
 		i, _ := strconv.Atoi(value)

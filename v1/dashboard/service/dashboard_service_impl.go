@@ -159,40 +159,51 @@ func (d dashboardServiceImpl) ViewWebinarById(id string) db.Webinar {
 func (d dashboardServiceImpl) EditWebinar(id string, webinar *request.EditWebinar) error {
 	originalWebinar, _ := d.webinarDao.GetWebinarsByID(id)
 
+	fmt.Printf("Original duration: %d\n", originalWebinar.Duration)
+	fmt.Printf("New duration: %d\n", webinar.Duration)
 	if webinar.Agenda != originalWebinar.Agenda {
+		fmt.Println("***** agenda *****")
 		err := d.webinarDao.UpdateWebinars(id, "agenda", webinar.Agenda)
 		if err != nil {
 			return err
 		}
-	} else if webinar.Description != originalWebinar.Description {
+	}
+	if webinar.Description != originalWebinar.Description {
+		fmt.Println("***** desc *****")
 		err := d.webinarDao.UpdateWebinars(id, "description", webinar.Description)
 		if err != nil {
 			return err
 		}
-	} else if webinar.ScheduleAt != originalWebinar.ScheduleAt {
+	}
+	if webinar.ScheduleAt != originalWebinar.ScheduleAt {
+		fmt.Println("***** ScheduleAt *****")
 		err := d.webinarDao.UpdateWebinars(id, "schedule_at", webinar.ScheduleAt.Format(time.RFC3339))
 		if err != nil {
 			return err
 		}
-	} else if webinar.Duration != originalWebinar.Duration {
+	}
+	if webinar.Duration != originalWebinar.Duration {
+		fmt.Println("***** Duration *****")
 		s := strconv.Itoa(webinar.Duration)
+		fmt.Println("**************************")
 		err := d.webinarDao.UpdateWebinars(id, "duration", s)
 		if err != nil {
 			return err
 		}
-	} else if webinar.HostedBy != originalWebinar.HostedBy {
+	}
+	if webinar.HostedBy != originalWebinar.HostedBy {
 		err := d.webinarDao.UpdateWebinars(id, "hosted_by", webinar.HostedBy)
 		if err != nil {
 			return err
 		}
-	} else if webinar.Postponed != originalWebinar.Postponed {
+	}
+	if webinar.Postponed != originalWebinar.Postponed {
+		fmt.Println("***** Postponed *****")
 		str := strconv.FormatBool(webinar.Postponed)
 		err := d.webinarDao.UpdateWebinars(id, "postponed", str)
 		if err != nil {
 			return err
 		}
-	} else {
-		fmt.Println("******************** nothing *******************")
 	}
 	return nil
 }
@@ -239,18 +250,18 @@ func (d dashboardServiceImpl) EditEvent(id string, event *request.EventRequest) 
 		if err != nil {
 			return err
 		}
-	} else if event.Picture != originalEvent.Picture {
+	}
+	if event.Picture != originalEvent.Picture {
 		err := d.newsEventsDao.UpdateNews(id, "picture", event.Picture)
 		if err != nil {
 			return err
 		}
-	} else if event.Body != originalEvent.Body {
+	}
+	if event.Body != originalEvent.Body {
 		err := d.newsEventsDao.UpdateNews(id, "body", event.Body)
 		if err != nil {
 			return err
 		}
-	} else {
-		fmt.Println("******************** nothing *******************")
 	}
 
 	return nil
@@ -311,17 +322,20 @@ func (d dashboardServiceImpl) EditMp(id string, mp *request.MpRequest) error {
 		if err != nil {
 			return nil
 		}
-	} else if mp.Bio != originalMp.Bio {
+	}
+	if mp.Bio != originalMp.Bio {
 		err := d.mpDao.UpdateMPs(id, "bio", mp.Bio)
 		if err != nil {
 			return nil
 		}
-	} else if mp.DateOfBirth != originalMp.DateBirth {
+	}
+	if mp.DateOfBirth != originalMp.DateBirth {
 		err := d.mpDao.UpdateMPs(id, "date_birth", mp.DateOfBirth.Format(time.RFC3339))
 		if err != nil {
 			return nil
 		}
-	} else if mp.MartialStatus != originalMp.MartialStatus {
+	}
+	if mp.MartialStatus != originalMp.MartialStatus {
 		err := d.mpDao.UpdateMPs(id, "martial_status", mp.MartialStatus)
 		if err != nil {
 			return nil
@@ -331,18 +345,18 @@ func (d dashboardServiceImpl) EditMp(id string, mp *request.MpRequest) error {
 		if err != nil {
 			return nil
 		}
-	} else if mp.Constituency != originalMp.Constituency {
+	}
+	if mp.Constituency != originalMp.Constituency {
 		err := d.mpDao.UpdateMPs(id, "constituency", mp.Constituency)
 		if err != nil {
 			return nil
 		}
-	} else if mp.Picture != originalMp.Image {
+	}
+	if mp.Picture != originalMp.Image {
 		err := d.mpDao.UpdateMPs(id, "picture", mp.Picture)
 		if err != nil {
 			return nil
 		}
-	} else {
-		fmt.Println("******************** nothing *******************")
 	}
 	return nil
 }
@@ -424,18 +438,18 @@ func (d dashboardServiceImpl) EditAdmin(id string, admin *request.AddManager) er
 		if err != nil {
 			return err
 		}
-	} else if admin.NationalID != originalAdmin.NationalID {
+	}
+	if admin.NationalID != originalAdmin.NationalID {
 		err := d.managerDao.UpdateManager(id, "national_id", admin.NationalID)
 		if err != nil {
 			return err
 		}
-	} else if admin.Role != originalAdmin.Role {
+	}
+	if admin.Role != originalAdmin.Role {
 		err := d.managerDao.UpdateManager(id, "role", string(rune(admin.Role)))
 		if err != nil {
 			return err
 		}
-	} else {
-		fmt.Println("******************** nothing *******************")
 	}
 	return nil
 }

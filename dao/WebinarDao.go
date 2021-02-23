@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"fmt"
 	"github.com/MbungeApp/mbunge-core/models/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -86,8 +87,12 @@ func (n NewWebinarDaoInterface) UpdateWebinars(id string, key string, value stri
 	objID, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.D{{"_id", objID}}
 	if key == "schedule_at" {
-		layout := "2006-01-02T15:04:05Z"
-		parsedDOB, _ := time.Parse(layout, value)
+		fmt.Printf("db called: %s\n", value)
+		//layout := "2021-02-11T16:30:01Z"
+		parsedDOB, err := time.Parse(time.RFC3339, value)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 		update = bson.D{{Key: "$set", Value: bson.M{key: parsedDOB, "updated_at": time.Now()}}}
 	} else if key == "postponed" {
 		result, _ := strconv.ParseBool(value)
